@@ -9,6 +9,14 @@ export interface ToolModule {
 
 export const toolModules: ToolModule[] = [
   {
+    id: 'regex-workbench',
+    title: 'Regex Workbench',
+    category: '正则',
+    path: '/tools/regex-workbench',
+    description: '测试表达式、查看分组并预览替换结果。',
+    keywords: ['regex', 'regexp', 'match', 'replace', 'groups'],
+  },
+  {
     id: 'time-lab',
     title: 'Time Lab',
     category: '时间',

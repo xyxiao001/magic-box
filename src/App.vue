@@ -212,6 +212,16 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </nav>
+
+      <a
+        class="sidebar-linkout"
+        href="https://github.com/xyxiao001/magic-box"
+        target="_blank"
+        rel="noreferrer"
+      >
+        GitHub
+        <span>github.com/xyxiao001/magic-box</span>
+      </a>
     </aside>
 
     <div class="workspace-shell">

@@ -27,12 +27,13 @@ describe('toolbox helpers', () => {
 
     expect(ordered.map((module) => module.id)).toEqual([
       'codec-lab',
+      'regex-workbench',
       'time-lab',
       'json-toolkit',
     ])
   })
 
   it('counts tool modules', () => {
-    expect(getToolCount(toolModules)).toBe(3)
+    expect(getToolCount(toolModules)).toBe(4)
   })
 })
