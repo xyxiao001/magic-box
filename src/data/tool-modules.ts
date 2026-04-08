@@ -1,0 +1,35 @@
+export interface ToolModule {
+  id: string
+  title: string
+  category: string
+  path: string
+  description: string
+  keywords: string[]
+}
+
+export const toolModules: ToolModule[] = [
+  {
+    id: 'time-lab',
+    title: 'Time Lab',
+    category: '时间',
+    path: '/tools/time-lab',
+    description: 'Unix 时间戳与日期字符串互转，支持本地时间和 UTC。',
+    keywords: ['timestamp', 'time', 'date', 'utc', 'unix'],
+  },
+  {
+    id: 'json-toolkit',
+    title: 'JSON Toolkit',
+    category: 'JSON',
+    path: '/tools/json-toolkit',
+    description: '格式化、压缩、校验 JSON，并给出清晰错误提示。',
+    keywords: ['json', 'format', 'minify', 'validate'],
+  },
+  {
+    id: 'codec-lab',
+    title: 'Codec Lab',
+    category: '编码',
+    path: '/tools/codec-lab',
+    description: 'Base64 与 URL 编解码，适合接口调试和临时转换。',
+    keywords: ['base64', 'urlencode', 'decode', 'encode'],
+  },
+]

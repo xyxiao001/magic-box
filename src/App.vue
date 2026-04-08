@@ -1,0 +1,228 @@
+<script setup lang="ts">
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { toolModules } from '@/data/tool-modules'
+import { orderModulesByFavorite } from '@/lib/toolbox'
+import { useWorkbenchStore } from '@/stores/workbench'
+
+const route = useRoute()
+const router = useRouter()
+const workbenchStore = useWorkbenchStore()
+
+const searchOpen = ref(false)
+const searchInput = ref<HTMLInputElement | null>(null)
+
+const currentModule = computed(() =>
+  toolModules.find((module) => module.path === route.path)
+)
+
+const searchResults = computed(() =>
+  orderModulesByFavorite(
+    toolModules,
+    workbenchStore.favoriteModuleIds,
+    workbenchStore.searchQuery
+  )
+)
+
+const pageTitle = computed(() => {
+  if (searchOpen.value) {
+    return workbenchStore.searchQuery
+      ? `${workbenchStore.searchQuery} - Search - Magic Box`
+      : 'Search - Magic Box'
+  }
+
+  if (currentModule.value) {
+    return `${currentModule.value.title} - Magic Box`
+  }
+
+  if (route.path === '/docs') {
+    return 'Docs - Magic Box'
+  }
+
+  return 'Magic Box'
+})
+
+function applyTheme(mode: 'dark' | 'mac-light') {
+  document.documentElement.dataset.theme = mode
+  document.documentElement.style.colorScheme = mode === 'mac-light' ? 'light' : 'dark'
+}
+
+function applyPageTitle(title: string) {
+  document.title = title
+}
+
+function openSearchPanel() {
+  searchOpen.value = true
+
+  nextTick(() => {
+    searchInput.value?.focus()
+  })
+}
+
+function closeSearchPanel(clearQuery = false) {
+  searchOpen.value = false
+
+  if (clearQuery) {
+    workbenchStore.searchQuery = ''
+  }
+}
+
+async function goToModule(path: string) {
+  await router.push(path)
+  closeSearchPanel(true)
+}
+
+function openFirstMatch() {
+  const firstMatch = searchResults.value[0]
+
+  if (firstMatch) {
+    void goToModule(firstMatch.path)
+  }
+}
+
+function handleGlobalKeydown(event: KeyboardEvent) {
+  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+    event.preventDefault()
+    openSearchPanel()
+    return
+  }
+
+  if (event.key === 'Escape' && searchOpen.value) {
+    closeSearchPanel(true)
+  }
+}
+
+watch(
+  () => route.fullPath,
+  () => {
+    searchOpen.value = false
+  }
+)
+
+watch(
+  () => workbenchStore.themeMode,
+  (mode) => {
+    applyTheme(mode)
+  }
+)
+
+watch(pageTitle, (title) => {
+  applyPageTitle(title)
+})
+
+onMounted(() => {
+  applyTheme(workbenchStore.themeMode)
+  applyPageTitle(pageTitle.value)
+  window.addEventListener('keydown', handleGlobalKeydown)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', handleGlobalKeydown)
+})
+</script>
+
+<template>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand-block">
+        <p class="eyebrow">Developer Toolbox</p>
+        <h1>Magic Box</h1>
+        <p class="brand-copy">直接进入工具页，搜索和切换都走全局入口。</p>
+      </div>
+
+      <button type="button" class="search-launch" @click="openSearchPanel">
+        搜索工具
+        <span class="shortcut-key">⌘K / Ctrl+K</span>
+      </button>
+
+      <div class="theme-switcher" aria-label="主题切换">
+        <button
+          type="button"
+          class="theme-option"
+          :class="{ 'theme-option-active': workbenchStore.themeMode === 'dark' }"
+          @click="workbenchStore.setThemeMode('dark')"
+        >
+          深色
+        </button>
+        <button
+          type="button"
+          class="theme-option"
+          :class="{ 'theme-option-active': workbenchStore.themeMode === 'mac-light' }"
+          @click="workbenchStore.setThemeMode('mac-light')"
+        >
+          Mac 浅色
+        </button>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="工具导航">
+        <RouterLink
+          v-for="module in toolModules"
+          :key="module.id"
+          :to="module.path"
+          class="nav-link"
+        >
+          <strong>{{ module.title }}</strong>
+          <span>{{ module.category }} · {{ module.description }}</span>
+        </RouterLink>
+      </nav>
+    </aside>
+
+    <div class="workspace-shell">
+      <header class="workspace-header">
+        <div>
+          <p class="eyebrow">{{ currentModule?.category || 'Workspace' }}</p>
+          <h2 class="workspace-title">{{ currentModule?.title || 'Magic Box' }}</h2>
+          <p class="workspace-subtitle">
+            {{ currentModule?.description || '程序员日常工具集合。' }}
+          </p>
+        </div>
+
+        <button type="button" class="search-launch search-launch-inline" @click="openSearchPanel">
+          搜索工具
+          <span class="shortcut-key">⌘K</span>
+        </button>
+      </header>
+
+      <main class="content-panel">
+        <RouterView />
+      </main>
+    </div>
+
+    <div v-if="searchOpen" class="palette-backdrop" @click="closeSearchPanel(true)">
+      <section class="palette-panel" @click.stop>
+        <div class="palette-head">
+          <input
+            ref="searchInput"
+            v-model="workbenchStore.searchQuery"
+            class="palette-input"
+            type="text"
+            placeholder="搜索 time / json / base64 / url"
+            @keydown.enter.prevent="openFirstMatch"
+          />
+        </div>
+
+        <div v-if="searchResults.length" class="palette-results">
+          <button
+            v-for="module in searchResults"
+            :key="module.id"
+            type="button"
+            class="palette-item"
+            @click="goToModule(module.path)"
+          >
+            <div class="palette-item-copy">
+              <strong class="palette-item-title">{{ module.title }}</strong>
+              <span class="palette-item-meta">{{ module.category }} · {{ module.description }}</span>
+            </div>
+            <span class="palette-item-tag">
+              {{
+                workbenchStore.favoriteModuleIds.includes(module.id) ? '收藏' : '打开'
+              }}
+            </span>
+          </button>
+        </div>
+
+        <p v-else class="palette-empty">没有匹配工具，试试 `json`、`time` 或 `base64`。</p>
+      </section>
+    </div>
+  </div>
+</template>
