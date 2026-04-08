@@ -15,12 +15,25 @@
 
 ## Phase 3: Workflow Features
 
-- 模块置顶持久化
-- 最近使用记录
+- 收藏持久化
+- 工具侧边栏持续打磨
 - 搜索和命令面板
 
 ## Phase 4: Expansion
 
+- Regex Workbench
 - HTTP Lab
-- 二维码生成
+- QRCode Studio
 - 文档与资源聚合
+
+## 当前建议优先级
+
+1. `Regex Workbench`
+2. `HTTP Lab`
+3. `QRCode Studio`
+
+理由：
+
+- 正则工具和当前已有的转换类工具最接近，前端即可闭环
+- HTTP Lab 用户价值高，但交互和状态复杂度更高
+- 二维码生成适合作为轻量快速交付模块，能提升工具覆盖面

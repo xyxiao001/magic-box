@@ -2,7 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { toolModules } from '@/data/tool-modules'
-import { orderModulesByFavorite } from '@/lib/toolbox'
+import { orderModulesByPreference } from '@/lib/toolbox'
 import { useWorkbenchStore } from '@/stores/workbench'
 
 const route = useRoute()
@@ -16,12 +16,12 @@ const currentModule = computed(() =>
   toolModules.find((module) => module.path === route.path)
 )
 
+const navigationModules = computed(() =>
+  orderModulesByPreference(toolModules, workbenchStore.favoriteModuleIds, '')
+)
+
 const searchResults = computed(() =>
-  orderModulesByFavorite(
-    toolModules,
-    workbenchStore.favoriteModuleIds,
-    workbenchStore.searchQuery
-  )
+  orderModulesByPreference(toolModules, workbenchStore.favoriteModuleIds, workbenchStore.searchQuery)
 )
 
 const pageTitle = computed(() => {
@@ -127,60 +127,122 @@ onBeforeUnmount(() => {
       <div class="brand-block">
         <p class="eyebrow">Developer Toolbox</p>
         <h1>Magic Box</h1>
-        <p class="brand-copy">直接进入工具页，搜索和切换都走全局入口。</p>
       </div>
 
-      <button type="button" class="search-launch" @click="openSearchPanel">
-        搜索工具
-        <span class="shortcut-key">⌘K / Ctrl+K</span>
-      </button>
+      <div class="sidebar-toolbar">
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="搜索工具"
+          title="搜索工具"
+          @click="openSearchPanel"
+        >
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="toolbar-icon">
+            <circle cx="8.5" cy="8.5" r="4.75" stroke="currentColor" stroke-width="1.6" />
+            <path
+              d="M12.2 12.2L16.2 16.2"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
 
-      <div class="theme-switcher" aria-label="主题切换">
-        <button
-          type="button"
-          class="theme-option"
-          :class="{ 'theme-option-active': workbenchStore.themeMode === 'dark' }"
-          @click="workbenchStore.setThemeMode('dark')"
-        >
-          深色
-        </button>
-        <button
-          type="button"
-          class="theme-option"
-          :class="{ 'theme-option-active': workbenchStore.themeMode === 'mac-light' }"
-          @click="workbenchStore.setThemeMode('mac-light')"
-        >
-          Mac 浅色
-        </button>
+        <div class="theme-switcher" aria-label="主题切换">
+          <button
+            type="button"
+            class="theme-option"
+            :class="{ 'theme-option-active': workbenchStore.themeMode === 'dark' }"
+            @click="workbenchStore.setThemeMode('dark')"
+          >
+            深色
+          </button>
+          <button
+            type="button"
+            class="theme-option"
+            :class="{ 'theme-option-active': workbenchStore.themeMode === 'mac-light' }"
+            @click="workbenchStore.setThemeMode('mac-light')"
+          >
+            浅色
+          </button>
+        </div>
+
+        <span class="shortcut-key shortcut-key-inline">⌘K</span>
       </div>
 
       <nav class="sidebar-nav" aria-label="工具导航">
-        <RouterLink
-          v-for="module in toolModules"
+        <div
+          v-for="module in navigationModules"
           :key="module.id"
-          :to="module.path"
-          class="nav-link"
+          class="nav-entry"
+          :class="{
+            'nav-entry-active': currentModule?.id === module.id,
+            'nav-entry-favorite': workbenchStore.favoriteModuleIds.includes(module.id),
+          }"
         >
-          <strong>{{ module.title }}</strong>
-          <span>{{ module.category }} · {{ module.description }}</span>
-        </RouterLink>
+          <RouterLink :to="module.path" class="nav-link">
+            <div class="nav-link-copy">
+              <span class="nav-link-kicker">{{ module.category }}</span>
+              <strong>{{ module.title }}</strong>
+              <span class="nav-link-description">{{ module.description }}</span>
+            </div>
+            <div class="nav-link-badges">
+              <span
+                v-if="workbenchStore.favoriteModuleIds.includes(module.id)"
+                class="nav-badge nav-badge-favorite"
+              >
+                Saved
+              </span>
+            </div>
+          </RouterLink>
+
+          <div class="nav-actions">
+            <button
+              type="button"
+              class="nav-action-button"
+              :aria-label="
+                workbenchStore.favoriteModuleIds.includes(module.id)
+                  ? `取消收藏 ${module.title}`
+                  : `收藏 ${module.title}`
+              "
+              @click.stop="workbenchStore.toggleFavoriteModule(module.id)"
+            >
+              {{ workbenchStore.favoriteModuleIds.includes(module.id) ? '★' : '☆' }}
+            </button>
+          </div>
+        </div>
       </nav>
     </aside>
 
     <div class="workspace-shell">
       <header class="workspace-header">
-        <div>
-          <p class="eyebrow">{{ currentModule?.category || 'Workspace' }}</p>
-          <h2 class="workspace-title">{{ currentModule?.title || 'Magic Box' }}</h2>
-          <p class="workspace-subtitle">
-            {{ currentModule?.description || '程序员日常工具集合。' }}
-          </p>
+        <div class="workspace-header-main">
+          <div class="traffic-lights" aria-hidden="true">
+            <span class="traffic-light traffic-light-close"></span>
+            <span class="traffic-light traffic-light-minimize"></span>
+            <span class="traffic-light traffic-light-expand"></span>
+          </div>
+
+          <div>
+            <p class="eyebrow">{{ currentModule?.category || 'Workspace' }}</p>
+            <h2 class="workspace-title">{{ currentModule?.title || 'Magic Box' }}</h2>
+            <p class="workspace-subtitle">
+              {{ currentModule?.description || '程序员日常工具集合。' }}
+            </p>
+          </div>
         </div>
 
-        <button type="button" class="search-launch search-launch-inline" @click="openSearchPanel">
-          搜索工具
-          <span class="shortcut-key">⌘K</span>
-        </button>
+        <div class="workspace-header-actions">
+          <div class="workspace-chip">Local-first</div>
+          <button
+            type="button"
+            class="search-launch search-launch-inline"
+            @click="openSearchPanel"
+          >
+            搜索工具
+            <span class="shortcut-key">⌘K</span>
+          </button>
+        </div>
       </header>
 
       <main class="content-panel">
