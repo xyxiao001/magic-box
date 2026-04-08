@@ -38,6 +38,80 @@ level=3`,
     replacement: '$1',
     testText: 'hello@example.com\nops@magic-box.dev',
   },
+  {
+    label: 'URL 提取',
+    pattern: 'https?:\\/\\/[^\\s)"]+',
+    flags: 'g',
+    replacement: '[link] $&',
+    testText:
+      '文档地址 https://developer.mozilla.org/docs/Web/JavaScript ，线上站点 https://magic-box-lyart.vercel.app/tools/time-lab',
+  },
+  {
+    label: '手机号脱敏',
+    pattern: '(1\\d{2})\\d{4}(\\d{4})',
+    flags: 'g',
+    replacement: '$1****$2',
+    testText: '13812345678\n15600001234',
+  },
+  {
+    label: 'IPv4 地址',
+    pattern:
+      '\\b(?:(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)\\.){3}(?:25[0-5]|2[0-4]\\d|1?\\d?\\d)\\b',
+    flags: 'g',
+    replacement: '[ip] $&',
+    testText: 'allow 192.168.0.12\nblock 10.10.10.300\nfallback 8.8.8.8',
+  },
+  {
+    label: 'Markdown 标题',
+    pattern: '^(#{1,6})\\s+(.+)$',
+    flags: 'gm',
+    replacement: '$1 [$2]',
+    testText: '# Magic Box\n## Regex Workbench\n### 模板清单',
+  },
+  {
+    label: 'HTML 标签',
+    pattern: '<([a-z][\\w-]*)(?:\\s[^>]*)?>',
+    flags: 'gi',
+    replacement: '<$1>',
+    testText:
+      '<section class="hero">\n  <img src="/logo.png" alt="logo" />\n  <button data-role="cta">Open</button>\n</section>',
+  },
+  {
+    label: '日志级别',
+    pattern: '\\b(INFO|WARN|ERROR|DEBUG)\\b',
+    flags: 'g',
+    replacement: '[$1]',
+    testText:
+      '2026-04-08 INFO boot ok\n2026-04-08 WARN cache miss\n2026-04-08 ERROR request timeout',
+  },
+  {
+    label: '驼峰拆词',
+    pattern: '([a-z0-9])([A-Z])',
+    flags: 'g',
+    replacement: '$1 $2',
+    testText: 'magicBoxRegexWorkbench\nparseHTTPHeader',
+  },
+  {
+    label: '连续空行压缩',
+    pattern: '\\n{3,}',
+    flags: 'g',
+    replacement: '\n\n',
+    testText: 'first\n\n\n\nsecond\n\n\nthird',
+  },
+  {
+    label: '连续空格压缩',
+    pattern: '[ \\t]{2,}',
+    flags: 'g',
+    replacement: ' ',
+    testText: 'const    answer   =    42;\nlet\t\tname\t=   "dev";',
+  },
+  {
+    label: '中文括号内容',
+    pattern: '（([^）]+)）',
+    flags: 'g',
+    replacement: '[$1]',
+    testText: '正则工具（支持命名分组）\n时间工具（支持批量转换）',
+  },
 ]
 
 const analysis = computed(() =>
