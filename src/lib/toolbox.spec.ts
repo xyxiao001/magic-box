@@ -40,10 +40,15 @@ describe('toolbox helpers', () => {
       'color-studio',
       'cron-planner',
       'hash-studio',
+      'calculator-pro',
+      'unit-converter',
+      'clipboard-history',
+      'weather-desk',
+      'white-noise-studio',
     ])
   })
 
   it('counts tool modules', () => {
-    expect(getToolCount(toolModules)).toBe(14)
+    expect(getToolCount(toolModules)).toBe(19)
   })
 })

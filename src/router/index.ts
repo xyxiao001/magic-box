@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DocsView from '@/views/DocsView.vue'
+import CalculatorProView from '@/views/tools/CalculatorProView.vue'
+import ClipboardHistoryView from '@/views/tools/ClipboardHistoryView.vue'
 import CodecLabView from '@/views/tools/CodecLabView.vue'
 import ColorStudioView from '@/views/tools/ColorStudioView.vue'
 import CronPlannerView from '@/views/tools/CronPlannerView.vue'
@@ -14,6 +16,9 @@ import QrcodeStudioView from '@/views/tools/QrcodeStudioView.vue'
 import MarkdownStudioView from '@/views/tools/MarkdownStudioView.vue'
 import RegexWorkbenchView from '@/views/tools/RegexWorkbenchView.vue'
 import TimeLabView from '@/views/tools/TimeLabView.vue'
+import UnitConverterView from '@/views/tools/UnitConverterView.vue'
+import WeatherDeskView from '@/views/tools/WeatherDeskView.vue'
+import WhiteNoiseStudioView from '@/views/tools/WhiteNoiseStudioView.vue'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -56,6 +61,31 @@ export const router = createRouter({
       path: '/tools/hash-studio',
       name: 'hash-studio',
       component: HashStudioView,
+    },
+    {
+      path: '/tools/calculator-pro',
+      name: 'calculator-pro',
+      component: CalculatorProView,
+    },
+    {
+      path: '/tools/unit-converter',
+      name: 'unit-converter',
+      component: UnitConverterView,
+    },
+    {
+      path: '/tools/clipboard-history',
+      name: 'clipboard-history',
+      component: ClipboardHistoryView,
+    },
+    {
+      path: '/tools/weather-desk',
+      name: 'weather-desk',
+      component: WeatherDeskView,
+    },
+    {
+      path: '/tools/white-noise-studio',
+      name: 'white-noise-studio',
+      component: WhiteNoiseStudioView,
     },
     {
       path: '/tools/time-lab',

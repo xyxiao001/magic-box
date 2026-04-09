@@ -42,6 +42,14 @@
 - Cron Planner
 - Hash Studio
 
+## Phase 8: Completed Expansion
+
+- Weather Desk
+- Calculator Pro
+- Unit Converter
+- White Noise Studio
+- Clipboard History
+
 ## 当前状态
 
 已完成：
@@ -60,10 +68,15 @@
 - `Color Studio`
 - `Cron Planner`
 - `Hash Studio`
+- `Calculator Pro`
+- `Unit Converter`
+- `Clipboard History`
+- `Weather Desk`
+- `White Noise Studio`
 
 下一批建议：
 
-- 开始新一轮跨领域工具规划
+- 开始下一轮综合工具规划
 
 ## 开发流程
 

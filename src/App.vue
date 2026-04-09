@@ -1,9 +1,15 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useRegisterSW } from 'virtual:pwa-register/vue'
 import { toolModules } from '@/data/tool-modules'
 import { orderModulesByPreference } from '@/lib/toolbox'
 import { useWorkbenchStore } from '@/stores/workbench'
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>
+}
 
 const route = useRoute()
 const router = useRouter()
@@ -11,6 +17,14 @@ const workbenchStore = useWorkbenchStore()
 
 const searchOpen = ref(false)
 const searchInput = ref<HTMLInputElement | null>(null)
+const deferredInstallPrompt = ref<BeforeInstallPromptEvent | null>(null)
+const showInstallButton = ref(false)
+
+const {
+  needRefresh: pwaNeedRefresh,
+  offlineReady: pwaOfflineReady,
+  updateServiceWorker,
+} = useRegisterSW()
 
 const currentModule = computed(() =>
   toolModules.find((module) => module.path === route.path)
@@ -96,6 +110,41 @@ function toggleCurrentModuleFavorite() {
   workbenchStore.toggleFavoriteModule(currentModule.value.id)
 }
 
+async function installPwa() {
+  if (!deferredInstallPrompt.value) {
+    return
+  }
+
+  await deferredInstallPrompt.value.prompt()
+  const choice = await deferredInstallPrompt.value.userChoice
+
+  if (choice.outcome === 'accepted') {
+    showInstallButton.value = false
+  }
+
+  deferredInstallPrompt.value = null
+}
+
+function dismissPwaNotice(type: 'offline' | 'refresh') {
+  if (type === 'offline') {
+    pwaOfflineReady.value = false
+    return
+  }
+
+  pwaNeedRefresh.value = false
+}
+
+function handleBeforeInstallPrompt(event: Event) {
+  event.preventDefault()
+  deferredInstallPrompt.value = event as BeforeInstallPromptEvent
+  showInstallButton.value = true
+}
+
+function handleAppInstalled() {
+  deferredInstallPrompt.value = null
+  showInstallButton.value = false
+}
+
 function handleGlobalKeydown(event: KeyboardEvent) {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
     event.preventDefault()
@@ -130,10 +179,14 @@ onMounted(() => {
   applyTheme(workbenchStore.themeMode)
   applyPageTitle(pageTitle.value)
   window.addEventListener('keydown', handleGlobalKeydown)
+  window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+  window.addEventListener('appinstalled', handleAppInstalled)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleGlobalKeydown)
+  window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+  window.removeEventListener('appinstalled', handleAppInstalled)
 })
 </script>
 
@@ -261,6 +314,14 @@ onBeforeUnmount(() => {
         <div class="workspace-header-actions">
           <div class="workspace-chip">Local-first</div>
           <button
+            v-if="showInstallButton"
+            type="button"
+            class="ghost-button workspace-install-button"
+            @click="installPwa"
+          >
+            安装应用
+          </button>
+          <button
             v-if="currentModule"
             type="button"
             class="nav-action-button workspace-favorite-button"
@@ -283,6 +344,33 @@ onBeforeUnmount(() => {
       <main class="content-panel">
         <RouterView />
       </main>
+
+      <section v-if="pwaOfflineReady || pwaNeedRefresh" class="pwa-toast-stack">
+        <article v-if="pwaOfflineReady" class="pwa-toast-card">
+          <div>
+            <strong>已支持离线访问</strong>
+            <p>应用资源已缓存，下次打开会更快。</p>
+          </div>
+          <button type="button" class="ghost-button small-button" @click="dismissPwaNotice('offline')">
+            知道了
+          </button>
+        </article>
+
+        <article v-if="pwaNeedRefresh" class="pwa-toast-card">
+          <div>
+            <strong>发现新版本</strong>
+            <p>刷新后即可使用最新内容和缓存。</p>
+          </div>
+          <div class="input-toolbar">
+            <button type="button" class="solid-button small-button" @click="updateServiceWorker(true)">
+              立即更新
+            </button>
+            <button type="button" class="ghost-button small-button" @click="dismissPwaNotice('refresh')">
+              稍后
+            </button>
+          </div>
+        </article>
+      </section>
     </div>
 
     <div v-if="searchOpen" class="palette-backdrop" @click="closeSearchPanel(true)">
