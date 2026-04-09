@@ -2,7 +2,6 @@
 import { computed, ref } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { analyzeRegex, type RegexMatchEntry } from '@/lib/regex'
-import { useWorkbenchStore } from '@/stores/workbench'
 
 type RegexTemplateCategory = 'extract' | 'transform' | 'content' | 'cleanup'
 
@@ -22,8 +21,6 @@ interface HighlightSegment {
   matchNumber?: number
   zeroWidth?: boolean
 }
-
-const workbenchStore = useWorkbenchStore()
 
 const pattern = ref('(?<name>[a-z]+)=(\\d+)')
 const flags = ref('g')
@@ -314,31 +311,6 @@ function buildHighlightSegments(text: string, matches: RegexMatchEntry[]) {
 
 <template>
   <section class="tool-page tool-page-regex">
-    <header class="tool-page-header">
-      <div>
-        <div class="pill-row">
-          <span class="section-badge">正则</span>
-          <span class="status-badge">Regex Workbench</span>
-        </div>
-        <h1 class="tool-page-title">正则表达式工作台</h1>
-        <p class="tool-page-description">
-          输入表达式、flags 和测试文本，实时查看命中、捕获组、替换结果和整段高亮。
-        </p>
-      </div>
-
-      <button
-        type="button"
-        class="ghost-button"
-        @click="workbenchStore.toggleFavoriteModule('regex-workbench')"
-      >
-        {{
-          workbenchStore.favoriteModuleIds.includes('regex-workbench')
-            ? '取消收藏'
-            : '收藏工具'
-        }}
-      </button>
-    </header>
-
     <div class="tool-page-layout">
       <section class="editor-pane">
         <div class="pane-header">

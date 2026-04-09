@@ -5,6 +5,7 @@ import HttpLabView from '@/views/tools/HttpLabView.vue'
 import JsonToolkitView from '@/views/tools/JsonToolkitView.vue'
 import PackageRadarView from '@/views/tools/PackageRadarView.vue'
 import QrcodeStudioView from '@/views/tools/QrcodeStudioView.vue'
+import MarkdownStudioView from '@/views/tools/MarkdownStudioView.vue'
 import RegexWorkbenchView from '@/views/tools/RegexWorkbenchView.vue'
 import TimeLabView from '@/views/tools/TimeLabView.vue'
 
@@ -14,6 +15,11 @@ export const router = createRouter({
     {
       path: '/',
       redirect: '/tools/time-lab',
+    },
+    {
+      path: '/tools/markdown-studio',
+      name: 'markdown-studio',
+      component: MarkdownStudioView,
     },
     {
       path: '/tools/time-lab',

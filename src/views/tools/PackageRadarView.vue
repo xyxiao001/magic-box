@@ -10,9 +10,6 @@ import {
   type PackageDetail,
   type PackageSearchItem,
 } from '@/lib/package-radar'
-import { useWorkbenchStore } from '@/stores/workbench'
-
-const workbenchStore = useWorkbenchStore()
 
 const searchQuery = ref('vue')
 const searchResults = ref<PackageSearchItem[]>([])
@@ -129,31 +126,6 @@ onMounted(() => {
 
 <template>
   <section class="tool-page tool-page-package">
-    <header class="tool-page-header">
-      <div>
-        <div class="pill-row">
-          <span class="section-badge">包管理</span>
-          <span class="status-badge">Package Radar</span>
-        </div>
-        <h1 class="tool-page-title">npm 包雷达</h1>
-        <p class="tool-page-description">
-          搜索 npm 包并查看最新版本、发布时间、安装命令和官方链接。
-        </p>
-      </div>
-
-      <button
-        type="button"
-        class="ghost-button"
-        @click="workbenchStore.toggleFavoriteModule('package-radar')"
-      >
-        {{
-          workbenchStore.favoriteModuleIds.includes('package-radar')
-            ? '取消收藏'
-            : '收藏工具'
-        }}
-      </button>
-    </header>
-
     <div class="tool-page-layout">
       <section class="editor-pane">
         <div class="pane-header">

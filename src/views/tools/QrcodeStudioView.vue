@@ -3,15 +3,12 @@ import QRCode from 'qrcode'
 import { computed, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { buildQrDownloadName, detectQrContentType } from '@/lib/qrcode-tool'
-import { useWorkbenchStore } from '@/stores/workbench'
 
 interface QrTemplate {
   label: string
   summary: string
   content: string
 }
-
-const workbenchStore = useWorkbenchStore()
 
 const qrContent = ref('https://magic-box-lyart.vercel.app/tools/http-lab')
 const qrSize = ref(320)
@@ -140,31 +137,6 @@ watch(
 
 <template>
   <section class="tool-page tool-page-qrcode">
-    <header class="tool-page-header">
-      <div>
-        <div class="pill-row">
-          <span class="section-badge">二维码</span>
-          <span class="status-badge">QRCode Studio</span>
-        </div>
-        <h1 class="tool-page-title">二维码生成工作台</h1>
-        <p class="tool-page-description">
-          输入任意 URL 或文本，在本地实时生成二维码，并直接下载 PNG。
-        </p>
-      </div>
-
-      <button
-        type="button"
-        class="ghost-button"
-        @click="workbenchStore.toggleFavoriteModule('qrcode-studio')"
-      >
-        {{
-          workbenchStore.favoriteModuleIds.includes('qrcode-studio')
-            ? '取消收藏'
-            : '收藏工具'
-        }}
-      </button>
-    </header>
-
     <div class="tool-page-layout">
       <section class="editor-pane">
         <div class="pane-header">

@@ -2,9 +2,6 @@
 import { computed, ref } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { transformCodec } from '@/lib/codec'
-import { useWorkbenchStore } from '@/stores/workbench'
-
-const workbenchStore = useWorkbenchStore()
 const codecInput = ref('hello world')
 const codecMode = ref<'base64' | 'url'>('base64')
 const codecAction = ref<'encode' | 'decode'>('encode')
@@ -31,25 +28,6 @@ async function copyOutput() {
 
 <template>
   <section class="tool-page tool-page-codec">
-    <header class="tool-page-header">
-      <div>
-        <div class="pill-row">
-          <span class="section-badge">编码</span>
-          <span class="status-badge">Codec Lab</span>
-        </div>
-        <h1 class="tool-page-title">Base64 / URL 编解码</h1>
-        <p class="tool-page-description">切换模式和动作后，右侧结果会同步更新。</p>
-      </div>
-
-      <button
-        type="button"
-        class="ghost-button"
-        @click="workbenchStore.toggleFavoriteModule('codec-lab')"
-      >
-        {{ workbenchStore.favoriteModuleIds.includes('codec-lab') ? '取消收藏' : '收藏工具' }}
-      </button>
-    </header>
-
     <div class="tool-page-layout">
       <section class="editor-pane">
         <div class="inline-fields">

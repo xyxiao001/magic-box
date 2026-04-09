@@ -2,9 +2,7 @@
 import { computed, ref } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { buildTimeLabResult } from '@/lib/time'
-import { useWorkbenchStore } from '@/stores/workbench'
 
-const workbenchStore = useWorkbenchStore()
 const timeInput = ref(String(Date.now()))
 const copiedLabel = ref('')
 
@@ -51,27 +49,6 @@ function setExample(value: string) {
 
 <template>
   <section class="tool-page tool-page-time">
-    <header class="tool-page-header">
-      <div>
-        <div class="pill-row">
-          <span class="section-badge">时间</span>
-          <span class="status-badge">Time Lab</span>
-        </div>
-        <h1 class="tool-page-title">时间戳转换</h1>
-        <p class="tool-page-description">
-          在秒级、毫秒级时间戳、本地日期字符串和 UTC 结果之间快速切换。
-        </p>
-      </div>
-
-      <button
-        type="button"
-        class="ghost-button"
-        @click="workbenchStore.toggleFavoriteModule('time-lab')"
-      >
-        {{ workbenchStore.favoriteModuleIds.includes('time-lab') ? '取消收藏' : '收藏工具' }}
-      </button>
-    </header>
-
     <div class="tool-page-layout">
       <section class="editor-pane">
         <div class="pane-header">

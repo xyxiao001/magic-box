@@ -2,9 +2,6 @@
 import { ref } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { formatJson, minifyJson, validateJson } from '@/lib/json-tool'
-import { useWorkbenchStore } from '@/stores/workbench'
-
-const workbenchStore = useWorkbenchStore()
 const jsonInput = ref(`{
   "name": "Magic Box",
   "stack": ["Vue 3", "Vite", "TypeScript"],
@@ -69,29 +66,6 @@ async function copyOutput() {
 
 <template>
   <section class="tool-page tool-page-json">
-    <header class="tool-page-header">
-      <div>
-        <div class="pill-row">
-          <span class="section-badge">JSON</span>
-          <span class="status-badge">JSON Toolkit</span>
-        </div>
-        <h1 class="tool-page-title">JSON 格式化与校验</h1>
-        <p class="tool-page-description">左侧粘贴原始 JSON，右侧得到格式化或压缩结果。</p>
-      </div>
-
-      <button
-        type="button"
-        class="ghost-button"
-        @click="workbenchStore.toggleFavoriteModule('json-toolkit')"
-      >
-        {{
-          workbenchStore.favoriteModuleIds.includes('json-toolkit')
-            ? '取消收藏'
-            : '收藏工具'
-        }}
-      </button>
-    </header>
-
     <div class="tool-page-layout wide-layout">
       <section class="editor-pane">
         <div class="pane-header">

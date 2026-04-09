@@ -16,6 +16,14 @@ const currentModule = computed(() =>
   toolModules.find((module) => module.path === route.path)
 )
 
+const isCurrentModuleFavorite = computed(() => {
+  if (!currentModule.value) {
+    return false
+  }
+
+  return workbenchStore.favoriteModuleIds.includes(currentModule.value.id)
+})
+
 const navigationModules = computed(() =>
   orderModulesByPreference(toolModules, workbenchStore.favoriteModuleIds, '')
 )
@@ -78,6 +86,14 @@ function openFirstMatch() {
   if (firstMatch) {
     void goToModule(firstMatch.path)
   }
+}
+
+function toggleCurrentModuleFavorite() {
+  if (!currentModule.value) {
+    return
+  }
+
+  workbenchStore.toggleFavoriteModule(currentModule.value.id)
 }
 
 function handleGlobalKeydown(event: KeyboardEvent) {
@@ -244,6 +260,15 @@ onBeforeUnmount(() => {
 
         <div class="workspace-header-actions">
           <div class="workspace-chip">Local-first</div>
+          <button
+            v-if="currentModule"
+            type="button"
+            class="nav-action-button workspace-favorite-button"
+            :aria-label="isCurrentModuleFavorite ? `取消收藏 ${currentModule.title}` : `收藏 ${currentModule.title}`"
+            @click="toggleCurrentModuleFavorite"
+          >
+            {{ isCurrentModuleFavorite ? '★' : '☆' }}
+          </button>
           <button
             type="button"
             class="search-launch search-launch-inline"

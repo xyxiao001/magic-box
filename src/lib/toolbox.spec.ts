@@ -33,10 +33,11 @@ describe('toolbox helpers', () => {
       'package-radar',
       'time-lab',
       'json-toolkit',
+      'markdown-studio',
     ])
   })
 
   it('counts tool modules', () => {
-    expect(getToolCount(toolModules)).toBe(7)
+    expect(getToolCount(toolModules)).toBe(8)
   })
 })

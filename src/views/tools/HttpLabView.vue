@@ -10,7 +10,6 @@ import {
   type HttpMethod,
 } from '@/lib/http'
 import { formatJson } from '@/lib/json-tool'
-import { useWorkbenchStore } from '@/stores/workbench'
 
 interface HttpTemplate {
   label: string
@@ -20,8 +19,6 @@ interface HttpTemplate {
   headers: string
   body: string
 }
-
-const workbenchStore = useWorkbenchStore()
 
 const method = ref<HttpMethod>('GET')
 const requestUrl = ref('https://jsonplaceholder.typicode.com/users/1')
@@ -189,31 +186,6 @@ async function sendRequest() {
 
 <template>
   <section class="tool-page tool-page-http">
-    <header class="tool-page-header">
-      <div>
-        <div class="pill-row">
-          <span class="section-badge">HTTP</span>
-          <span class="status-badge">HTTP Lab</span>
-        </div>
-        <h1 class="tool-page-title">轻量接口调试台</h1>
-        <p class="tool-page-description">
-          配置 URL、Method、Headers 和 JSON Body，右侧直接查看状态、响应头和响应体。
-        </p>
-      </div>
-
-      <button
-        type="button"
-        class="ghost-button"
-        @click="workbenchStore.toggleFavoriteModule('http-lab')"
-      >
-        {{
-          workbenchStore.favoriteModuleIds.includes('http-lab')
-            ? '取消收藏'
-            : '收藏工具'
-        }}
-      </button>
-    </header>
-
     <div class="tool-page-layout">
       <section class="editor-pane">
         <div class="pane-header">

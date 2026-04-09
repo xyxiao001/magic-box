@@ -8,9 +8,15 @@ importers:
 
   .:
     dependencies:
+      html-to-image:
+        specifier: ^1.11.13
+        version: 1.11.13
       pinia:
         specifier: ^3.0.4
         version: 3.0.4(typescript@6.0.2)(vue@3.5.32(typescript@6.0.2))
+      prismjs:
+        specifier: ^1.30.0
+        version: 1.30.0
       qrcode:
         specifier: 1.5.4
         version: 1.5.4
@@ -27,6 +33,9 @@ importers:
       '@types/node':
         specifier: ^24.12.2
         version: 24.12.2
+      '@types/prismjs':
+        specifier: ^1.26.6
+        version: 1.26.6
       '@types/qrcode':
         specifier: 1.5.6
         version: 1.5.6
@@ -653,6 +662,9 @@ packages:
   '@types/node@24.12.2':
     resolution: {integrity: sha512-A1sre26ke7HDIuY/M23nd9gfB+nrmhtYyMINbjI1zHJxYteKR6qSMX56FsmjMcDb3SMcjJg5BiRRgOCC/yBD0g==}
 
+  '@types/prismjs@1.26.6':
+    resolution: {integrity: sha512-vqlvI7qlMvcCBbVe0AKAb4f97//Hy0EBTaiW8AalRnG/xAN5zOiWWyrNqNXeq8+KAuvRewjCVY1+IPxk4RdNYw==}
+
   '@types/qrcode@1.5.6':
     resolution: {integrity: sha512-te7NQcV2BOvdj2b1hCAHzAoMNuj65kNBMz0KBaxM6c3VGBOhU0dURQKOtH8CFNI/dsKkwlv32p26qYQTWoB5bw==}
 
@@ -1196,6 +1208,9 @@ packages:
   html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
 
+  html-to-image@1.11.13:
+    resolution: {integrity: sha512-cuOPoI7WApyhBElTTb9oqsawRvZ0rHhaHwghRLlTuffoD1B2aDemlCruLeZrUIIdvG7gs9xeELEPm6PhuASqrg==}
+
   http-proxy-agent@7.0.2:
     resolution: {integrity: sha512-T1gkAiYYDWYx3V5Bmyu7HcfcvL7mUrTWiM6yOfa3PIphViJ/gFPbvidQ+veqSOHci/PxBcDabeUNCzpOODJZig==}
     engines: {node: '>= 14'}
@@ -1551,6 +1566,10 @@ packages:
     resolution: {integrity: sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==}
     engines: {node: '>=14'}
     hasBin: true
+
+  prismjs@1.30.0:
+    resolution: {integrity: sha512-DEvV2ZF2r2/63V+tK8hQvrR2ZGn10srHbXviTlcv7Kpzw8jWiNTqbVgjO3IY8RxrrOUF8VPMQQFysYYYv0YZxw==}
+    engines: {node: '>=6'}
 
   proto-list@1.2.4:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
@@ -2369,6 +2388,8 @@ snapshots:
     dependencies:
       undici-types: 7.16.0
 
+  '@types/prismjs@1.26.6': {}
+
   '@types/qrcode@1.5.6':
     dependencies:
       '@types/node': 24.12.2
@@ -3003,6 +3024,8 @@ snapshots:
 
   html-escaper@2.0.2: {}
 
+  html-to-image@1.11.13: {}
+
   http-proxy-agent@7.0.2:
     dependencies:
       agent-base: 7.1.4
@@ -3327,6 +3350,8 @@ snapshots:
   prelude-ls@1.2.1: {}
 
   prettier@3.8.1: {}
+
+  prismjs@1.30.0: {}
 
   proto-list@1.2.4: {}
 

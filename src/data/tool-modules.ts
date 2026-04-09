@@ -64,4 +64,12 @@ export const toolModules: ToolModule[] = [
     description: 'Base64 与 URL 编解码，适合接口调试和临时转换。',
     keywords: ['base64', 'urlencode', 'decode', 'encode'],
   },
+  {
+    id: 'markdown-studio',
+    title: 'Markdown Studio',
+    category: '文档',
+    path: '/tools/markdown-studio',
+    description: '编辑 Markdown 并实时预览，内置常用模板与统计。',
+    keywords: ['markdown', 'md', 'preview', 'editor', 'readme'],
+  },
 ]
