@@ -30,12 +30,13 @@ describe('toolbox helpers', () => {
       'regex-workbench',
       'http-lab',
       'qrcode-studio',
+      'package-radar',
       'time-lab',
       'json-toolkit',
     ])
   })
 
   it('counts tool modules', () => {
-    expect(getToolCount(toolModules)).toBe(6)
+    expect(getToolCount(toolModules)).toBe(7)
   })
 })

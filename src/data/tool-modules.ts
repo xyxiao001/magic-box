@@ -33,6 +33,14 @@ export const toolModules: ToolModule[] = [
     keywords: ['qrcode', 'qr', 'png', 'download', 'share'],
   },
   {
+    id: 'package-radar',
+    title: 'Package Radar',
+    category: '包管理',
+    path: '/tools/package-radar',
+    description: '搜索 npm 包并查看版本、安装命令与官方链接。',
+    keywords: ['npm', 'package', 'registry', 'version', 'install'],
+  },
+  {
     id: 'time-lab',
     title: 'Time Lab',
     category: '时间',

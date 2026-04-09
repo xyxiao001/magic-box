@@ -3,6 +3,7 @@ import DocsView from '@/views/DocsView.vue'
 import CodecLabView from '@/views/tools/CodecLabView.vue'
 import HttpLabView from '@/views/tools/HttpLabView.vue'
 import JsonToolkitView from '@/views/tools/JsonToolkitView.vue'
+import PackageRadarView from '@/views/tools/PackageRadarView.vue'
 import QrcodeStudioView from '@/views/tools/QrcodeStudioView.vue'
 import RegexWorkbenchView from '@/views/tools/RegexWorkbenchView.vue'
 import TimeLabView from '@/views/tools/TimeLabView.vue'
@@ -33,6 +34,11 @@ export const router = createRouter({
       path: '/tools/qrcode-studio',
       name: 'qrcode-studio',
       component: QrcodeStudioView,
+    },
+    {
+      path: '/tools/package-radar',
+      name: 'package-radar',
+      component: PackageRadarView,
     },
     {
       path: '/tools/json-toolkit',
