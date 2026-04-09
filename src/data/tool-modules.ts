@@ -17,6 +17,14 @@ export const toolModules: ToolModule[] = [
     keywords: ['regex', 'regexp', 'match', 'replace', 'groups'],
   },
   {
+    id: 'http-lab',
+    title: 'HTTP Lab',
+    category: '接口',
+    path: '/tools/http-lab',
+    description: '构造请求、调试响应并查看状态码、响应头和响应体。',
+    keywords: ['http', 'api', 'fetch', 'request', 'response'],
+  },
+  {
     id: 'time-lab',
     title: 'Time Lab',
     category: '时间',

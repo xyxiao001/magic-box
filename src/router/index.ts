@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DocsView from '@/views/DocsView.vue'
 import CodecLabView from '@/views/tools/CodecLabView.vue'
+import HttpLabView from '@/views/tools/HttpLabView.vue'
 import JsonToolkitView from '@/views/tools/JsonToolkitView.vue'
 import RegexWorkbenchView from '@/views/tools/RegexWorkbenchView.vue'
 import TimeLabView from '@/views/tools/TimeLabView.vue'
@@ -21,6 +22,11 @@ export const router = createRouter({
       path: '/tools/regex-workbench',
       name: 'regex-workbench',
       component: RegexWorkbenchView,
+    },
+    {
+      path: '/tools/http-lab',
+      name: 'http-lab',
+      component: HttpLabView,
     },
     {
       path: '/tools/json-toolkit',
