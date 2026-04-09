@@ -34,10 +34,16 @@ describe('toolbox helpers', () => {
       'time-lab',
       'json-toolkit',
       'markdown-studio',
+      'jwt-studio',
+      'diff-studio',
+      'image-studio',
+      'color-studio',
+      'cron-planner',
+      'hash-studio',
     ])
   })
 
   it('counts tool modules', () => {
-    expect(getToolCount(toolModules)).toBe(8)
+    expect(getToolCount(toolModules)).toBe(14)
   })
 })

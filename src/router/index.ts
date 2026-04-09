@@ -1,8 +1,14 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import DocsView from '@/views/DocsView.vue'
 import CodecLabView from '@/views/tools/CodecLabView.vue'
+import ColorStudioView from '@/views/tools/ColorStudioView.vue'
+import CronPlannerView from '@/views/tools/CronPlannerView.vue'
+import DiffStudioView from '@/views/tools/DiffStudioView.vue'
+import HashStudioView from '@/views/tools/HashStudioView.vue'
 import HttpLabView from '@/views/tools/HttpLabView.vue'
+import ImageStudioView from '@/views/tools/ImageStudioView.vue'
 import JsonToolkitView from '@/views/tools/JsonToolkitView.vue'
+import JwtStudioView from '@/views/tools/JwtStudioView.vue'
 import PackageRadarView from '@/views/tools/PackageRadarView.vue'
 import QrcodeStudioView from '@/views/tools/QrcodeStudioView.vue'
 import MarkdownStudioView from '@/views/tools/MarkdownStudioView.vue'
@@ -20,6 +26,36 @@ export const router = createRouter({
       path: '/tools/markdown-studio',
       name: 'markdown-studio',
       component: MarkdownStudioView,
+    },
+    {
+      path: '/tools/jwt-studio',
+      name: 'jwt-studio',
+      component: JwtStudioView,
+    },
+    {
+      path: '/tools/diff-studio',
+      name: 'diff-studio',
+      component: DiffStudioView,
+    },
+    {
+      path: '/tools/image-studio',
+      name: 'image-studio',
+      component: ImageStudioView,
+    },
+    {
+      path: '/tools/color-studio',
+      name: 'color-studio',
+      component: ColorStudioView,
+    },
+    {
+      path: '/tools/cron-planner',
+      name: 'cron-planner',
+      component: CronPlannerView,
+    },
+    {
+      path: '/tools/hash-studio',
+      name: 'hash-studio',
+      component: HashStudioView,
     },
     {
       path: '/tools/time-lab',

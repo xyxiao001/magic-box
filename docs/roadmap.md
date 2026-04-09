@@ -23,12 +23,24 @@
 
 - Regex Workbench
 
-## Phase 5: In Progress
+## Phase 5: Completed Expansion
 
 - HTTP Lab
 - QRCode Studio
 - Package Radar
 - Markdown Studio
+
+## Phase 6: Completed Expansion
+
+- JWT Studio
+- Diff Studio
+
+## Phase 7: Completed Expansion
+
+- Image Studio
+- Color Studio
+- Cron Planner
+- Hash Studio
 
 ## 当前状态
 
@@ -38,20 +50,20 @@
 - `JSON Toolkit`
 - `Codec Lab`
 - `Regex Workbench`
+- `HTTP Lab`
+- `QRCode Studio`
+- `Package Radar`
+- `Markdown Studio`
+- `JWT Studio`
+- `Diff Studio`
+- `Image Studio`
+- `Color Studio`
+- `Cron Planner`
+- `Hash Studio`
 
-下一批建议按这个顺序推进：
+下一批建议：
 
-1. `HTTP Lab`
-2. `QRCode Studio`
-3. `Package Radar`
-4. `Markdown Studio`
-
-优先级理由：
-
-- `HTTP Lab` 用户价值最高，做出来后会直接把百宝箱从“转换工具集合”拉到“开发工作台”
-- `QRCode Studio` 可快速交付，适合在高复杂模块之间穿插，保持版本节奏
-- `Package Radar` 能补上 npm 包查询、版本检查和安全感知，贴合程序员高频需求
-- `Markdown Studio` 和现有本地优先工具栈兼容度高，也适合后续接模板与导出
+- 开始新一轮跨领域工具规划
 
 ## 开发流程
 
