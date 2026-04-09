@@ -7,8 +7,9 @@
 使用递增编号：
 
 - `0001-foundation-bootstrap.md`
-- `0002-json-toolkit.md`
-- `0003-time-lab.md`
+- `0002-regex-workbench.md`
+- `0003-http-lab.md`
+- `0004-qrcode-studio.md`
 
 ## 每份 spec 至少回答这些问题
 
@@ -24,5 +25,5 @@
 1. 建 spec
 2. 评审范围
 3. 编码实现
-4. 运行测试和构建
-5. 回写结果
+4. 运行 `lint` / `typecheck` / `test` / `build`
+5. 回写结果并提交
