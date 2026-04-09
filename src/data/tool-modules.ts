@@ -25,6 +25,14 @@ export const toolModules: ToolModule[] = [
     keywords: ['http', 'api', 'fetch', 'request', 'response'],
   },
   {
+    id: 'qrcode-studio',
+    title: 'QRCode Studio',
+    category: '二维码',
+    path: '/tools/qrcode-studio',
+    description: '本地生成二维码，支持尺寸、配色和 PNG 下载。',
+    keywords: ['qrcode', 'qr', 'png', 'download', 'share'],
+  },
+  {
     id: 'time-lab',
     title: 'Time Lab',
     category: '时间',

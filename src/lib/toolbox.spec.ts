@@ -29,12 +29,13 @@ describe('toolbox helpers', () => {
       'codec-lab',
       'regex-workbench',
       'http-lab',
+      'qrcode-studio',
       'time-lab',
       'json-toolkit',
     ])
   })
 
   it('counts tool modules', () => {
-    expect(getToolCount(toolModules)).toBe(5)
+    expect(getToolCount(toolModules)).toBe(6)
   })
 })
