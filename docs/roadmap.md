@@ -50,6 +50,14 @@
 - White Noise Studio
 - Clipboard History
 
+## Phase 9: Planned
+
+- Request Converter
+- Header & Cookie Lab
+- JSON Typegen
+- WebSocket Lab
+- HMAC Signer
+
 ## 当前状态
 
 已完成：
@@ -76,7 +84,11 @@
 
 下一批建议：
 
-- 开始下一轮综合工具规划
+- `Request Converter`：联调最常见入口，能直接把 cURL 变成可运行代码
+- `Header & Cookie Lab`：排障高频，尤其是鉴权、跨域、缓存、灰度链路
+- `JSON Typegen`：前后端都刚需，生成 TS/Zod 省大量重复劳动
+- `WebSocket Lab`：实时链路联调工具，常见但缺轻量替代
+- `HMAC Signer`：网关签名/Webhook 验签场景很高频，能显著降低排查成本
 
 ## 开发流程
 

@@ -18,8 +18,7 @@ describe('toolbox helpers', () => {
   it('filters modules by search query', () => {
     const ordered = filterModulesBySearch(toolModules, 'json')
 
-    expect(ordered).toHaveLength(1)
-    expect(ordered[0]?.id).toBe('json-toolkit')
+    expect(ordered.map((module) => module.id)).toEqual(['json-toolkit', 'json-typegen'])
   })
 
   it('keeps original order after favorite modules when no manual sorting exists', () => {
@@ -45,10 +44,15 @@ describe('toolbox helpers', () => {
       'clipboard-history',
       'weather-desk',
       'white-noise-studio',
+      'request-converter',
+      'header-cookie-lab',
+      'json-typegen',
+      'websocket-lab',
+      'hmac-signer',
     ])
   })
 
   it('counts tool modules', () => {
-    expect(getToolCount(toolModules)).toBe(19)
+    expect(getToolCount(toolModules)).toBe(24)
   })
 })

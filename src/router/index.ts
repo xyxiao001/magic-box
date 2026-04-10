@@ -9,15 +9,20 @@ import DiffStudioView from '@/views/tools/DiffStudioView.vue'
 import HashStudioView from '@/views/tools/HashStudioView.vue'
 import HttpLabView from '@/views/tools/HttpLabView.vue'
 import ImageStudioView from '@/views/tools/ImageStudioView.vue'
+import HmacSignerView from '@/views/tools/HmacSignerView.vue'
+import HeaderCookieLabView from '@/views/tools/HeaderCookieLabView.vue'
 import JsonToolkitView from '@/views/tools/JsonToolkitView.vue'
+import JsonTypegenView from '@/views/tools/JsonTypegenView.vue'
 import JwtStudioView from '@/views/tools/JwtStudioView.vue'
 import PackageRadarView from '@/views/tools/PackageRadarView.vue'
 import QrcodeStudioView from '@/views/tools/QrcodeStudioView.vue'
 import MarkdownStudioView from '@/views/tools/MarkdownStudioView.vue'
 import RegexWorkbenchView from '@/views/tools/RegexWorkbenchView.vue'
+import RequestConverterView from '@/views/tools/RequestConverterView.vue'
 import TimeLabView from '@/views/tools/TimeLabView.vue'
 import UnitConverterView from '@/views/tools/UnitConverterView.vue'
 import WeatherDeskView from '@/views/tools/WeatherDeskView.vue'
+import WebSocketLabView from '@/views/tools/WebSocketLabView.vue'
 import WhiteNoiseStudioView from '@/views/tools/WhiteNoiseStudioView.vue'
 
 export const router = createRouter({
@@ -86,6 +91,31 @@ export const router = createRouter({
       path: '/tools/white-noise-studio',
       name: 'white-noise-studio',
       component: WhiteNoiseStudioView,
+    },
+    {
+      path: '/tools/request-converter',
+      name: 'request-converter',
+      component: RequestConverterView,
+    },
+    {
+      path: '/tools/header-cookie-lab',
+      name: 'header-cookie-lab',
+      component: HeaderCookieLabView,
+    },
+    {
+      path: '/tools/json-typegen',
+      name: 'json-typegen',
+      component: JsonTypegenView,
+    },
+    {
+      path: '/tools/websocket-lab',
+      name: 'websocket-lab',
+      component: WebSocketLabView,
+    },
+    {
+      path: '/tools/hmac-signer',
+      name: 'hmac-signer',
+      component: HmacSignerView,
     },
     {
       path: '/tools/time-lab',
