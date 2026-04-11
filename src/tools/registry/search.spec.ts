@@ -29,6 +29,12 @@ describe('tool search ranking', () => {
     expect(searchToolDefinitions(toolDefinitions, 'nanoid')[0]?.id).toBe('uuid-studio')
   })
 
+  it('surfaces new json diff and csv/sql tools for direct queries', () => {
+    expect(searchToolDefinitions(toolDefinitions, 'jsonpath')[0]?.id).toBe('json-diff-jsonpath')
+    expect(searchToolDefinitions(toolDefinitions, 'csv')[0]?.id).toBe('csv-toolkit')
+    expect(searchToolDefinitions(toolDefinitions, 'sql')[0]?.id).toBe('sql-formatter')
+  })
+
   it('prefers favorites and recent usage in empty search ordering', () => {
     const results = searchToolDefinitions(toolDefinitions, '', {
       favoriteToolIds: ['request-converter'],
