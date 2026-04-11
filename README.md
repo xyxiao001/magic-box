@@ -49,6 +49,7 @@ Magic Box 是一个 local-first 的百宝箱网站，覆盖开发调试、内容
 - PWA：支持安装、自动更新提示、静态资源缓存和已访问页面离线访问
 - 工具工作台：支持搜索、收藏、最近使用以及部分工具的历史记录
 - 网络工具补充：`HTTP Lab`、`WebSocket Lab`、`Package Radar`、`Weather Desk` 依赖网络请求
+- 最新工具批次：已补齐 `JSON Diff / JSONPath`、`CSV Toolkit`、`SQL Formatter`
 - Spec Flow：`/docs` 页面直接映射仓库里的规划文档，先写 spec 再实现
 - 统一体验：深浅主题、Liquid Glass 风格组件和统一工具布局
 

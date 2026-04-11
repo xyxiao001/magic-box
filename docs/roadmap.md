@@ -58,7 +58,7 @@
 - WebSocket Lab
 - HMAC Signer
 
-## Phase 10: Planned
+## Phase 10: Completed Expansion
 
 - URL Inspector
 - Text Toolkit
@@ -67,7 +67,13 @@
 - UUID / NanoID Studio
 - CSV Toolkit
 - SQL Formatter
+
+## Phase 11: Planned
+
 - Password Generator
+- JSON Schema / OpenAPI Helpers
+- SQL Query Runner Mock
+- CSV Column Mapping
 
 ## 当前状态
 
@@ -92,17 +98,25 @@
 - `Clipboard History`
 - `Weather Desk`
 - `White Noise Studio`
+- `URL Inspector`
+- `Text Toolkit`
+- `JWT Sign / Verify`
+- `JSON Typegen`
+- `JSON Diff / JSONPath`
+- `UUID / NanoID Studio`
+- `Request Converter`
+- `Header & Cookie Lab`
+- `WebSocket Lab`
+- `HMAC Signer`
+- `CSV Toolkit`
+- `SQL Formatter`
 
 下一批建议：
 
-- `URL Inspector`：和 `HTTP Lab`、`Request Converter`、`Header & Cookie Lab` 联动最强
-- `Text Toolkit`：覆盖面最大，开发和非开发都能直接使用
-- `JWT Sign / Verify`：补齐 `JWT Studio` 的生成、解析、验签闭环
-- `JSON Diff / JSONPath`：接口联调、配置排查和响应体分析高频场景
-- `UUID / NanoID Studio`：实现简单、使用高频，适合快速补位
-- `CSV Toolkit`：可覆盖开发、测试、运营、产品等更广用户群
-- `SQL Formatter`：典型刚需，且适合本地处理
 - `Password Generator`：简单实用，补齐基础工具集
+- `JSON Schema / OpenAPI Helpers`：和 `HTTP Lab`、`JSON Toolkit`、`JSON Typegen` 能形成更完整的接口链路
+- `SQL Query Runner Mock`：适合补 SQL 工具链的“验证结果”能力，但仍保持本地优先
+- `CSV Column Mapping`：适合把 `CSV Toolkit` 从格式转换继续扩展到数据清洗场景
 
 ## 开发流程
 
