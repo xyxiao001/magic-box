@@ -8,16 +8,24 @@ import {
   togglePinnedEntry,
   type ClipboardEntry,
 } from '@/lib/clipboard-history'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 const storageKey = 'magic-box.clipboard-history.entries'
+const storageDomain = 'tool-history:clipboard-history:entries'
+
+function parseClipboardEntries(raw: string) {
+  try {
+    return JSON.parse(raw) as ClipboardEntry[]
+  } catch {
+    return undefined
+  }
+}
+
 const entries = ref<ClipboardEntry[]>(
-  (() => {
-    try {
-      return JSON.parse(localStorage.getItem(storageKey) || '[]') as ClipboardEntry[]
-    } catch {
-      return []
-    }
-  })()
+  readStorage<ClipboardEntry[]>(storageDomain, [], {
+    legacyKeys: [storageKey],
+    parseLegacy: (raw) => parseClipboardEntries(raw),
+  })
 )
 const inputText = ref('')
 const searchQuery = ref('')
@@ -27,7 +35,7 @@ const filteredEntries = computed(() => searchClipboardEntries(entries.value, sea
 watch(
   entries,
   (value) => {
-    localStorage.setItem(storageKey, JSON.stringify(value))
+    writeStorage(storageDomain, value)
   },
   { deep: true }
 )

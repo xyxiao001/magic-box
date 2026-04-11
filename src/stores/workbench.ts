@@ -1,73 +1,80 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
 import { toolModules } from '@/data/tool-modules'
+import { defaultFavoriteToolIds, readFavoriteToolIds, writeFavoriteToolIds } from '@/lib/favorites'
+import {
+  readRecentToolEntries,
+  recordRecentToolVisit,
+  type RecentToolEntry,
+  writeRecentToolEntries,
+} from '@/lib/recent-tools'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 export type ThemeMode = 'dark' | 'mac-light'
 
-const defaultFavoriteModuleIds = ['time-lab', 'json-toolkit']
-const favoritesStorageKey = 'magic-box.favorite-modules'
-const searchStorageKey = 'magic-box.search-query'
-const themeStorageKey = 'magic-box.theme-mode'
+const themeDomain = 'theme'
+const searchDomain = 'search-query'
+const legacyThemeStorageKey = 'magic-box.theme-mode'
+const legacySearchStorageKey = 'magic-box.search-query'
 
-function parseStoredModuleIds(raw: string | null) {
-  if (!raw) {
-    return null
+function parseLegacyThemeMode(raw: string) {
+  if (raw === 'dark' || raw === 'mac-light') {
+    return raw
   }
+}
 
-  try {
-    const parsed = JSON.parse(raw) as string[]
-    if (!Array.isArray(parsed) || !parsed.every((item) => typeof item === 'string')) {
-      return null
-    }
-
-    return parsed
-  } catch {
-    return null
+function parseLegacySearchQuery(raw: string) {
+  if (typeof raw === 'string') {
+    return raw
   }
 }
 
 export const useWorkbenchStore = defineStore('workbench', () => {
-  const favoriteModuleIds = ref<string[]>(defaultFavoriteModuleIds)
+  const validToolIds = toolModules.map((module) => module.id)
+  const favoriteModuleIds = ref<string[]>(defaultFavoriteToolIds)
+  const recentTools = ref<RecentToolEntry[]>([])
   const searchQuery = ref('')
   const themeMode = ref<ThemeMode>('mac-light')
 
   if (typeof window !== 'undefined') {
-    const cachedFavorites = parseStoredModuleIds(window.localStorage.getItem(favoritesStorageKey))
-    const cachedSearch = window.localStorage.getItem(searchStorageKey)
-    const cachedThemeMode = window.localStorage.getItem(themeStorageKey)
-
-    if (cachedFavorites) {
-      favoriteModuleIds.value = cachedFavorites.filter((id) =>
-        toolModules.some((module) => module.id === id)
-      )
-    }
-
-    if (cachedSearch) {
-      searchQuery.value = cachedSearch
-    }
-
-    if (cachedThemeMode === 'dark' || cachedThemeMode === 'mac-light') {
-      themeMode.value = cachedThemeMode
-    }
+    favoriteModuleIds.value = readFavoriteToolIds(validToolIds)
+    recentTools.value = readRecentToolEntries(validToolIds)
+    searchQuery.value = readStorage(searchDomain, '', {
+      legacyKeys: [legacySearchStorageKey],
+      parseLegacy: (raw) => parseLegacySearchQuery(raw),
+    })
+    themeMode.value = readStorage<ThemeMode>(themeDomain, 'mac-light', {
+      legacyKeys: [legacyThemeStorageKey],
+      parseLegacy: (raw) => parseLegacyThemeMode(raw),
+    })
 
     watch(
       favoriteModuleIds,
       (value) => {
-        window.localStorage.setItem(favoritesStorageKey, JSON.stringify(value))
+        writeFavoriteToolIds(value)
+      },
+      { deep: true }
+    )
+
+    watch(
+      recentTools,
+      (value) => {
+        writeRecentToolEntries(value)
       },
       { deep: true }
     )
 
     watch(searchQuery, (value) => {
-      window.localStorage.setItem(searchStorageKey, value)
+      writeStorage(searchDomain, value)
     })
 
     watch(themeMode, (value) => {
-      window.localStorage.setItem(themeStorageKey, value)
+      writeStorage(themeDomain, value)
     })
   }
 
   const favoriteCount = computed(() => favoriteModuleIds.value.length)
+  const recentToolIds = computed(() => recentTools.value.map((item) => item.id))
 
   function toggleFavoriteModule(moduleId: string) {
     if (favoriteModuleIds.value.includes(moduleId)) {
@@ -82,11 +89,22 @@ export const useWorkbenchStore = defineStore('workbench', () => {
     themeMode.value = mode
   }
 
+  function markToolUsed(moduleId: string) {
+    if (!validToolIds.includes(moduleId)) {
+      return
+    }
+
+    recentTools.value = recordRecentToolVisit(recentTools.value, moduleId)
+  }
+
   return {
     favoriteCount,
     favoriteModuleIds,
+    recentToolIds,
+    recentTools,
     searchQuery,
     themeMode,
+    markToolUsed,
     setThemeMode,
     toggleFavoriteModule,
   }

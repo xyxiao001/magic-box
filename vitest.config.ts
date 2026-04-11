@@ -1,7 +1,9 @@
 import { fileURLToPath, URL } from 'node:url'
+import { mergeConfig } from 'vite'
 import { defineConfig } from 'vitest/config'
+import viteConfig from './vite.config'
 
-export default defineConfig({
+export default mergeConfig(viteConfig, defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -15,4 +17,4 @@ export default defineConfig({
       reporter: ['text', 'html'],
     },
   },
-})
+}))

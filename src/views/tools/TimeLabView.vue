@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { buildTimeLabResult } from '@/lib/time'
+import { readStorage, writeStorage } from '@/lib/storage'
 
-const timeInput = ref(String(Date.now()))
+const timeInputDomain = 'tool-history:time-lab:input'
+const timeInput = ref(readStorage(timeInputDomain, String(Date.now()), { parseLegacy: (raw) => raw }))
 const copiedLabel = ref('')
 
 const timeResult = computed(() => buildTimeLabResult(timeInput.value))
@@ -45,6 +47,10 @@ function fillCurrentTime() {
 function setExample(value: string) {
   timeInput.value = value
 }
+
+watch(timeInput, (value) => {
+  writeStorage(timeInputDomain, value)
+})
 </script>
 
 <template>

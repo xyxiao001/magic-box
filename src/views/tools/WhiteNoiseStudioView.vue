@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { buildNoisePresets, formatTimerLabel } from '@/lib/noise-tool'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 interface ActiveNode {
   gain: GainNode
@@ -8,11 +9,33 @@ interface ActiveNode {
 }
 
 const presets = buildNoisePresets()
+const noiseStateDomain = 'tool-history:white-noise-studio:state'
+
+function parseSavedState(raw: string) {
+  try {
+    return JSON.parse(raw) as Partial<{
+      volume: number
+      timerMinutes: number
+    }>
+  } catch {
+    return undefined
+  }
+}
+
+const savedState = readStorage<
+  Partial<{
+    volume: number
+    timerMinutes: number
+  }>
+>(noiseStateDomain, {}, {
+  parseLegacy: (raw) => parseSavedState(raw),
+})
+
 const context = ref<AudioContext | null>(null)
 const masterGain = ref<GainNode | null>(null)
 const activeIds = ref<string[]>([])
-const volume = ref(60)
-const timerMinutes = ref(0)
+const volume = ref(savedState.volume ?? 60)
+const timerMinutes = ref(savedState.timerMinutes ?? 0)
 const remainingSeconds = ref(0)
 const intervalId = ref<number | null>(null)
 const activeNodes = new Map<string, ActiveNode>()
@@ -147,6 +170,13 @@ onBeforeUnmount(() => {
 })
 
 const activeCount = computed(() => activeIds.value.length)
+
+watch([volume, timerMinutes], () => {
+  writeStorage(noiseStateDomain, {
+    volume: volume.value,
+    timerMinutes: timerMinutes.value,
+  })
+})
 </script>
 
 <template>

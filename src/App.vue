@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
+import ToolTagList from '@/components/toolkit/ToolTagList.vue'
 import { toolModules } from '@/data/tool-modules'
 import { orderModulesByPreference } from '@/lib/toolbox'
 import { useWorkbenchStore } from '@/stores/workbench'
@@ -39,11 +40,16 @@ const isCurrentModuleFavorite = computed(() => {
 })
 
 const navigationModules = computed(() =>
-  orderModulesByPreference(toolModules, workbenchStore.favoriteModuleIds, '')
+  orderModulesByPreference(toolModules, workbenchStore.favoriteModuleIds, '', workbenchStore.recentTools)
 )
 
 const searchResults = computed(() =>
-  orderModulesByPreference(toolModules, workbenchStore.favoriteModuleIds, workbenchStore.searchQuery)
+  orderModulesByPreference(
+    toolModules,
+    workbenchStore.favoriteModuleIds,
+    workbenchStore.searchQuery,
+    workbenchStore.recentTools
+  )
 )
 
 const pageTitle = computed(() => {
@@ -161,6 +167,10 @@ watch(
   () => route.fullPath,
   () => {
     searchOpen.value = false
+
+    if (currentModule.value) {
+      workbenchStore.markToolUsed(currentModule.value.id)
+    }
   }
 )
 
@@ -178,6 +188,9 @@ watch(pageTitle, (title) => {
 onMounted(() => {
   applyTheme(workbenchStore.themeMode)
   applyPageTitle(pageTitle.value)
+  if (currentModule.value) {
+    workbenchStore.markToolUsed(currentModule.value.id)
+  }
   window.addEventListener('keydown', handleGlobalKeydown)
   window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
   window.addEventListener('appinstalled', handleAppInstalled)
@@ -312,7 +325,8 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="workspace-header-actions">
-          <div class="workspace-chip">Local-first</div>
+          <ToolTagList v-if="currentModule" :tags="currentModule.tags" compact />
+          <div v-else class="workspace-chip">Local-first</div>
           <button
             v-if="showInstallButton"
             type="button"
@@ -400,7 +414,11 @@ onBeforeUnmount(() => {
             </div>
             <span class="palette-item-tag">
               {{
-                workbenchStore.favoriteModuleIds.includes(module.id) ? '收藏' : '打开'
+                workbenchStore.favoriteModuleIds.includes(module.id)
+                  ? '收藏'
+                  : workbenchStore.recentToolIds.includes(module.id)
+                    ? '最近使用'
+                    : '打开'
               }}
             </span>
           </button>

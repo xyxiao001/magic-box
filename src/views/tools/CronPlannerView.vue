@@ -8,12 +8,14 @@ import {
   parseCronExpression,
   type CronBuilderState,
 } from '@/lib/cron-tool'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 const storageKey = 'magic-box.cron-planner.state'
+const storageDomain = 'tool-history:cron-planner:state'
 
-const savedState = (() => {
+function parseSavedState(raw: string) {
   try {
-    return JSON.parse(localStorage.getItem(storageKey) || '{}') as Partial<{
+    return JSON.parse(raw) as Partial<{
       expression: string
       mode: CronBuilderState['mode']
       minute: number
@@ -21,9 +23,22 @@ const savedState = (() => {
       weekday: number
     }>
   } catch {
-    return {}
+    return undefined
   }
-})()
+}
+
+const savedState = readStorage<
+  Partial<{
+    expression: string
+    mode: CronBuilderState['mode']
+    minute: number
+    hour: number
+    weekday: number
+  }>
+>(storageDomain, {}, {
+  legacyKeys: [storageKey],
+  parseLegacy: (raw) => parseSavedState(raw),
+})
 
 const expression = ref(savedState.expression || '30 10 * * 1-5')
 const builderMode = ref<CronBuilderState['mode']>(savedState.mode || 'weekdays')
@@ -62,16 +77,13 @@ async function copyValue(value: string, label: string) {
 }
 
 watch([expression, builderMode, builderMinute, builderHour, builderWeekday], () => {
-  localStorage.setItem(
-    storageKey,
-    JSON.stringify({
-      expression: expression.value,
-      mode: builderMode.value,
-      minute: builderMinute.value,
-      hour: builderHour.value,
-      weekday: builderWeekday.value,
-    })
-  )
+  writeStorage(storageDomain, {
+    expression: expression.value,
+    mode: builderMode.value,
+    minute: builderMinute.value,
+    hour: builderHour.value,
+    weekday: builderWeekday.value,
+  })
 })
 </script>
 

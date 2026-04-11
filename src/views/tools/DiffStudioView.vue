@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { buildLineDiff } from '@/lib/diff'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 interface DiffTemplate {
   label: string
@@ -12,6 +13,8 @@ interface DiffTemplate {
 
 const storageLeftKey = 'magic-box.diff-studio.left'
 const storageRightKey = 'magic-box.diff-studio.right'
+const storageLeftDomain = 'tool-history:diff-studio:left'
+const storageRightDomain = 'tool-history:diff-studio:right'
 
 const diffTemplates: DiffTemplate[] = [
   {
@@ -57,8 +60,18 @@ TRACE_ENABLED=true`,
   },
 ]
 
-const leftInput = ref(localStorage.getItem(storageLeftKey) || diffTemplates[0]?.left || '')
-const rightInput = ref(localStorage.getItem(storageRightKey) || diffTemplates[0]?.right || '')
+const leftInput = ref(
+  readStorage(storageLeftDomain, diffTemplates[0]?.left || '', {
+    legacyKeys: [storageLeftKey],
+    parseLegacy: (raw) => raw,
+  })
+)
+const rightInput = ref(
+  readStorage(storageRightDomain, diffTemplates[0]?.right || '', {
+    legacyKeys: [storageRightKey],
+    parseLegacy: (raw) => raw,
+  })
+)
 const copiedMessage = ref('')
 
 const diffResult = computed(() => buildLineDiff(leftInput.value, rightInput.value))
@@ -94,11 +107,11 @@ async function copyValue(value: string, label: string) {
 }
 
 watch(leftInput, (value) => {
-  localStorage.setItem(storageLeftKey, value)
+  writeStorage(storageLeftDomain, value)
 })
 
 watch(rightInput, (value) => {
-  localStorage.setItem(storageRightKey, value)
+  writeStorage(storageRightDomain, value)
 })
 </script>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 type ConnectionStatus = 'idle' | 'connecting' | 'open' | 'closed' | 'error'
 
@@ -12,10 +13,11 @@ interface WsLogEntry {
 }
 
 const stateKey = 'magic-box.websocket.state'
+const stateDomain = 'tool-history:websocket-lab:state'
 
-const saved = (() => {
+function parseSavedState(raw: string) {
   try {
-    return JSON.parse(localStorage.getItem(stateKey) || '{}') as Partial<{
+    return JSON.parse(raw) as Partial<{
       url: string
       protocols: string
       heartbeatEnabled: boolean
@@ -24,9 +26,23 @@ const saved = (() => {
       jsonMode: boolean
     }>
   } catch {
-    return {}
+    return undefined
   }
-})()
+}
+
+const saved = readStorage<
+  Partial<{
+    url: string
+    protocols: string
+    heartbeatEnabled: boolean
+    heartbeatInterval: number
+    heartbeatPayload: string
+    jsonMode: boolean
+  }>
+>(stateDomain, {}, {
+  legacyKeys: [stateKey],
+  parseLegacy: (raw) => parseSavedState(raw),
+})
 
 const urlInput = ref(saved.url || 'wss://echo.websocket.org')
 const protocolsInput = ref(saved.protocols || '')
@@ -199,17 +215,14 @@ async function copyLog(entry: WsLogEntry) {
 }
 
 watch([urlInput, protocolsInput, heartbeatEnabled, heartbeatInterval, heartbeatPayload, jsonMode], () => {
-  localStorage.setItem(
-    stateKey,
-    JSON.stringify({
-      url: urlInput.value,
-      protocols: protocolsInput.value,
-      heartbeatEnabled: heartbeatEnabled.value,
-      heartbeatInterval: heartbeatInterval.value,
-      heartbeatPayload: heartbeatPayload.value,
-      jsonMode: jsonMode.value,
-    })
-  )
+  writeStorage(stateDomain, {
+    url: urlInput.value,
+    protocols: protocolsInput.value,
+    heartbeatEnabled: heartbeatEnabled.value,
+    heartbeatInterval: heartbeatInterval.value,
+    heartbeatPayload: heartbeatPayload.value,
+    jsonMode: jsonMode.value,
+  })
 
   startHeartbeat()
 })
@@ -329,4 +342,3 @@ onBeforeUnmount(() => {
     <p v-if="toastMessage" class="clipboard-toast">{{ toastMessage }}</p>
   </section>
 </template>
-

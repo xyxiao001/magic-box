@@ -12,6 +12,7 @@ import {
   type CookieEntry,
   type SetCookieEntry,
 } from '@/lib/header-cookie'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 type Mode = 'headers' | 'cookie' | 'set-cookie'
 
@@ -19,9 +20,34 @@ const primaryKey = 'magic-box.header-cookie.primary'
 const secondaryKey = 'magic-box.header-cookie.secondary'
 const modeKey = 'magic-box.header-cookie.mode'
 
-const mode = ref<Mode>((localStorage.getItem(modeKey) as Mode) || 'headers')
-const primaryText = ref(localStorage.getItem(primaryKey) || 'Authorization: Bearer ...\nContent-Type: application/json')
-const secondaryText = ref(localStorage.getItem(secondaryKey) || '')
+const primaryDomain = 'tool-history:header-cookie-lab:primary'
+const secondaryDomain = 'tool-history:header-cookie-lab:secondary'
+const modeDomain = 'tool-history:header-cookie-lab:mode'
+
+function parseMode(raw: string) {
+  if (raw === 'headers' || raw === 'cookie' || raw === 'set-cookie') {
+    return raw
+  }
+}
+
+const mode = ref<Mode>(
+  readStorage<Mode>(modeDomain, 'headers', {
+    legacyKeys: [modeKey],
+    parseLegacy: (raw) => parseMode(raw),
+  })
+)
+const primaryText = ref(
+  readStorage(primaryDomain, 'Authorization: Bearer ...\nContent-Type: application/json', {
+    legacyKeys: [primaryKey],
+    parseLegacy: (raw) => raw,
+  })
+)
+const secondaryText = ref(
+  readStorage(secondaryDomain, '', {
+    legacyKeys: [secondaryKey],
+    parseLegacy: (raw) => raw,
+  })
+)
 const dedupeMode = ref<'keep-last' | 'keep-first'>('keep-last')
 const toastMessage = ref('')
 
@@ -57,9 +83,9 @@ function clearAll() {
 }
 
 watch([primaryText, secondaryText, mode], () => {
-  localStorage.setItem(primaryKey, primaryText.value)
-  localStorage.setItem(secondaryKey, secondaryText.value)
-  localStorage.setItem(modeKey, mode.value)
+  writeStorage(primaryDomain, primaryText.value)
+  writeStorage(secondaryDomain, secondaryText.value)
+  writeStorage(modeDomain, mode.value)
 })
 </script>
 

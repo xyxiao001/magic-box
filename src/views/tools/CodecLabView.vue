@@ -2,10 +2,38 @@
 import { computed, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { type CodecAction, type CodecMode, transformCodec } from '@/lib/codec'
+import { readStorage, writeStorage } from '@/lib/storage'
 
-const codecInput = ref('https%253A%252F%252Fmagic-box.dev%252Ftools%253Ftab%253Djson%2526keyword%253Dhello%252520world')
-const codecMode = ref<CodecMode>('url')
-const codecAction = ref<CodecAction>('decode-all')
+const codecStateDomain = 'tool-history:codec-lab:state'
+
+function parseSavedState(raw: string) {
+  try {
+    return JSON.parse(raw) as Partial<{
+      input: string
+      mode: CodecMode
+      action: CodecAction
+    }>
+  } catch {
+    return undefined
+  }
+}
+
+const savedState = readStorage<
+  Partial<{
+    input: string
+    mode: CodecMode
+    action: CodecAction
+  }>
+>(codecStateDomain, {}, {
+  parseLegacy: (raw) => parseSavedState(raw),
+})
+
+const codecInput = ref(
+  savedState.input ??
+    'https%253A%252F%252Fmagic-box.dev%252Ftools%253Ftab%253Djson%2526keyword%253Dhello%252520world'
+)
+const codecMode = ref<CodecMode>(savedState.mode ?? 'url')
+const codecAction = ref<CodecAction>(savedState.action ?? 'decode-all')
 const statusMessage = ref('')
 
 watch(codecMode, (mode) => {
@@ -21,6 +49,14 @@ watch(codecMode, (mode) => {
   if (codecAction.value === 'decode-all') {
     codecAction.value = 'decode'
   }
+})
+
+watch([codecInput, codecMode, codecAction], () => {
+  writeStorage(codecStateDomain, {
+    input: codecInput.value,
+    mode: codecMode.value,
+    action: codecAction.value,
+  })
 })
 
 const codecResult = computed(() => transformCodec(codecInput.value, codecMode.value, codecAction.value))

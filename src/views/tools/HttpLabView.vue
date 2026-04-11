@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import {
   buildHttpRequestConfig,
@@ -10,6 +10,7 @@ import {
   type HttpMethod,
 } from '@/lib/http'
 import { formatJson } from '@/lib/json-tool'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 interface HttpTemplate {
   label: string
@@ -20,10 +21,36 @@ interface HttpTemplate {
   body: string
 }
 
-const method = ref<HttpMethod>('GET')
-const requestUrl = ref('https://jsonplaceholder.typicode.com/users/1')
-const headersInput = ref('Accept: application/json')
-const bodyInput = ref('')
+const httpStateDomain = 'tool-history:http-lab:request'
+
+function parseSavedState(raw: string) {
+  try {
+    return JSON.parse(raw) as Partial<{
+      method: HttpMethod
+      url: string
+      headers: string
+      body: string
+    }>
+  } catch {
+    return undefined
+  }
+}
+
+const savedState = readStorage<
+  Partial<{
+    method: HttpMethod
+    url: string
+    headers: string
+    body: string
+  }>
+>(httpStateDomain, {}, {
+  parseLegacy: (raw) => parseSavedState(raw),
+})
+
+const method = ref<HttpMethod>(savedState.method ?? 'GET')
+const requestUrl = ref(savedState.url ?? 'https://jsonplaceholder.typicode.com/users/1')
+const headersInput = ref(savedState.headers ?? 'Accept: application/json')
+const bodyInput = ref(savedState.body ?? '')
 const isLoading = ref(false)
 const statusMessage = ref('准备发起请求')
 const statusTone = ref<'neutral' | 'success' | 'danger'>('neutral')
@@ -109,6 +136,15 @@ function applyTemplate(template: HttpTemplate) {
   applyStatus(`已应用模板：${template.label}`, 'neutral')
   resetResponse()
 }
+
+watch([method, requestUrl, headersInput, bodyInput], () => {
+  writeStorage(httpStateDomain, {
+    method: method.value,
+    url: requestUrl.value,
+    headers: headersInput.value,
+    body: bodyInput.value,
+  })
+})
 
 function formatRequestBody() {
   const raw = bodyInput.value.trim()

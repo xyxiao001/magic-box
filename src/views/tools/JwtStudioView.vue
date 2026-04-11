@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
+import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { buildUnsignedJwt, parseJwt } from '@/lib/jwt'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 interface JwtTemplate {
   label: string
@@ -58,7 +62,13 @@ const jwtTemplates: JwtTemplate[] = [
 ]
 
 const storageKey = 'magic-box.jwt-studio.token'
-const tokenInput = ref(localStorage.getItem(storageKey) || jwtTemplates[0]?.token || '')
+const storageDomain = 'tool-history:jwt-studio:token'
+const tokenInput = ref(
+  readStorage(storageDomain, jwtTemplates[0]?.token || '', {
+    legacyKeys: [storageKey],
+    parseLegacy: (raw) => raw,
+  })
+)
 const copiedMessage = ref('')
 
 const parsed = computed(() => parseJwt(tokenInput.value))
@@ -112,23 +122,15 @@ function clearInput() {
 }
 
 watch(tokenInput, (value) => {
-  localStorage.setItem(storageKey, value)
+  writeStorage(storageDomain, value)
 })
 </script>
 
 <template>
-  <section class="tool-page tool-page-jwt">
-    <div class="tool-page-layout">
-      <section class="editor-pane">
-        <div class="pane-header">
-          <div>
-            <h2 class="pane-title">Token 输入</h2>
-            <p class="meta-hint">只在本地解析 header / payload，不上传到外部服务。</p>
-          </div>
-          <span class="workspace-chip">{{ statusLabel }}</span>
-        </div>
-
-        <div class="input-toolbar">
+  <ToolPageLayout>
+    <template #editor>
+      <ToolPanel title="Token 输入" subtitle="只在本地解析 header / payload，不上传到外部服务。" :badge="statusLabel">
+        <ToolActionBar>
           <button
             v-for="template in jwtTemplates"
             :key="template.label"
@@ -142,14 +144,9 @@ watch(tokenInput, (value) => {
           <button type="button" class="ghost-button small-button" @click="copyValue(tokenInput, '原始 token')">
             复制 Token
           </button>
-        </div>
+        </ToolActionBar>
 
-        <section class="http-panel">
-          <div class="result-panel-header">
-            <span class="result-panel-title">模板说明</span>
-            <span class="meta-hint">快速覆盖“有效 / 过期 / 未生效”三种常见状态。</span>
-          </div>
-
+        <ToolPanel title="模板说明" subtitle="快速覆盖“有效 / 过期 / 未生效”三种常见状态。">
           <div class="jwt-template-list">
             <button
               v-for="template in jwtTemplates"
@@ -166,7 +163,7 @@ watch(tokenInput, (value) => {
               <p class="http-template-summary">{{ template.summary }}</p>
             </button>
           </div>
-        </section>
+        </ToolPanel>
 
         <label class="field-row">
           <span class="field-label">JWT</span>
@@ -177,30 +174,24 @@ watch(tokenInput, (value) => {
             placeholder="粘贴完整的 header.payload.signature"
           />
         </label>
-      </section>
+      </ToolPanel>
+    </template>
 
-      <section class="viewer-pane">
-        <div class="pane-header">
-          <div>
-            <h2 class="pane-title">解析结果</h2>
-            <p
-              class="helper-text"
-              :class="{
-                'helper-text-success': statusTone === 'success',
-                'helper-text-danger': statusTone === 'danger',
-              }"
-            >
-              {{ parsed.error || parsed.summary }}
-            </p>
-          </div>
-        </div>
+    <template #viewer>
+      <ToolPanel title="解析结果" :subtitle="parsed.error || parsed.summary">
+        <template #actions>
+          <span
+            class="helper-text"
+            :class="{
+              'helper-text-success': statusTone === 'success',
+              'helper-text-danger': statusTone === 'danger',
+            }"
+          >
+            {{ statusLabel }}
+          </span>
+        </template>
 
-        <section class="http-panel">
-          <div class="result-panel-header">
-            <span class="result-panel-title">状态摘要</span>
-            <span class="meta-hint">优先确认 token 当前是否可用，以及时间字段是否合理。</span>
-          </div>
-
+        <ToolPanel title="状态摘要" subtitle="优先确认 token 当前是否可用，以及时间字段是否合理。">
           <div class="data-list">
             <article class="data-row">
               <div>
@@ -219,14 +210,9 @@ watch(tokenInput, (value) => {
               </div>
             </article>
           </div>
-        </section>
+        </ToolPanel>
 
-        <section class="http-panel">
-          <div class="result-panel-header">
-            <span class="result-panel-title">Claims</span>
-            <span class="meta-hint">只展开最常见的前几项，避免信息过载。</span>
-          </div>
-
+        <ToolPanel title="Claims" subtitle="只展开最常见的前几项，避免信息过载。">
           <div v-if="parsed.claimRows.length" class="data-list">
             <article v-for="row in parsed.claimRows" :key="row.label" class="data-row">
               <div>
@@ -238,32 +224,32 @@ watch(tokenInput, (value) => {
           <div v-else class="empty-panel">
             <p>解析成功后，这里会展示 payload 中的关键字段。</p>
           </div>
-        </section>
+        </ToolPanel>
 
-        <section class="http-panel">
-          <div class="result-panel-header">
-            <span class="result-panel-title">Header</span>
+        <ToolPanel title="Header">
+          <template #actions>
             <button type="button" class="ghost-button small-button" @click="copyValue(parsed.headerText, 'header')">
               复制
             </button>
-          </div>
+          </template>
 
           <textarea :value="parsed.headerText" class="text-area text-area-compact" readonly placeholder="Header JSON 会显示在这里" />
-        </section>
+        </ToolPanel>
 
-        <section class="http-panel">
-          <div class="result-panel-header">
-            <span class="result-panel-title">Payload</span>
+        <ToolPanel title="Payload">
+          <template #actions>
             <button type="button" class="ghost-button small-button" @click="copyValue(parsed.payloadText, 'payload')">
               复制
             </button>
-          </div>
+          </template>
 
           <textarea :value="parsed.payloadText" class="text-area jwt-output" readonly placeholder="Payload JSON 会显示在这里" />
-        </section>
-      </section>
-    </div>
+        </ToolPanel>
+      </ToolPanel>
+    </template>
+  </ToolPageLayout>
 
+  <section>
     <p v-if="copiedMessage" class="clipboard-toast">{{ copiedMessage }}</p>
   </section>
 </template>

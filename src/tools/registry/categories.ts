@@ -1,0 +1,23 @@
+export const toolCategories = [
+  'JSON',
+  '二维码',
+  '编码',
+  '对比',
+  '文档',
+  '接口',
+  '正则',
+  '鉴权',
+  '校验',
+  '包管理',
+  '剪贴板',
+  '图片',
+  '颜色',
+  '时间',
+  '调度',
+  '计算',
+  '换算',
+  '天气',
+  '专注',
+] as const
+
+export type ToolCategory = (typeof toolCategories)[number]

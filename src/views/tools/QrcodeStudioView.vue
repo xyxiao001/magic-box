@@ -3,6 +3,7 @@ import QRCode from 'qrcode'
 import { computed, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { buildQrDownloadName, detectQrContentType } from '@/lib/qrcode-tool'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 interface QrTemplate {
   label: string
@@ -10,11 +11,39 @@ interface QrTemplate {
   content: string
 }
 
-const qrContent = ref('https://magic-box-lyart.vercel.app/tools/http-lab')
-const qrSize = ref(320)
-const qrMargin = ref(2)
-const foreground = ref('#0f1728')
-const background = ref('#f7fbff')
+const qrStateDomain = 'tool-history:qrcode-studio:state'
+
+function parseSavedState(raw: string) {
+  try {
+    return JSON.parse(raw) as Partial<{
+      content: string
+      size: number
+      margin: number
+      foreground: string
+      background: string
+    }>
+  } catch {
+    return undefined
+  }
+}
+
+const savedState = readStorage<
+  Partial<{
+    content: string
+    size: number
+    margin: number
+    foreground: string
+    background: string
+  }>
+>(qrStateDomain, {}, {
+  parseLegacy: (raw) => parseSavedState(raw),
+})
+
+const qrContent = ref(savedState.content ?? 'https://magic-box-lyart.vercel.app/tools/http-lab')
+const qrSize = ref(savedState.size ?? 320)
+const qrMargin = ref(savedState.margin ?? 2)
+const foreground = ref(savedState.foreground ?? '#0f1728')
+const background = ref(savedState.background ?? '#f7fbff')
 const statusMessage = ref('正在生成二维码')
 const statusTone = ref<'neutral' | 'success' | 'danger'>('neutral')
 const qrDataUrl = ref('')
@@ -129,6 +158,13 @@ let latestGenerationToken: symbol | null = null
 watch(
   [qrContent, qrSize, qrMargin, foreground, background],
   () => {
+    writeStorage(qrStateDomain, {
+      content: qrContent.value,
+      size: qrSize.value,
+      margin: qrMargin.value,
+      foreground: foreground.value,
+      background: background.value,
+    })
     void generateQrCode()
   },
   { immediate: true }

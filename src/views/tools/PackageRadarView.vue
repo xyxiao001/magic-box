@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import {
   buildInstallCommands,
@@ -10,8 +10,10 @@ import {
   type PackageDetail,
   type PackageSearchItem,
 } from '@/lib/package-radar'
+import { readStorage, writeStorage } from '@/lib/storage'
 
-const searchQuery = ref('vue')
+const searchQueryDomain = 'tool-history:package-radar:query'
+const searchQuery = ref(readStorage(searchQueryDomain, 'vue', { parseLegacy: (raw) => raw }))
 const searchResults = ref<PackageSearchItem[]>([])
 const selectedPackage = ref<PackageDetail | null>(null)
 const selectedPackageName = ref('')
@@ -118,6 +120,10 @@ function applyQuickPackage(name: string) {
   searchQuery.value = name
   void searchPackages(name)
 }
+
+watch(searchQuery, (value) => {
+  writeStorage(searchQueryDomain, value)
+})
 
 onMounted(() => {
   void searchPackages(searchQuery.value)

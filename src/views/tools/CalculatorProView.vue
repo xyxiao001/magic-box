@@ -9,11 +9,27 @@ import {
   type CalculatorHistoryEntry,
   type CalculatorQuickResult,
 } from '@/lib/calculator-tool'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 const expressionStorageKey = 'magic-box.calculator.expression'
 const historyStorageKey = 'magic-box.calculator.history'
+const expressionStorageDomain = 'tool-history:calculator-pro:expression'
+const historyStorageDomain = 'tool-history:calculator-pro:history'
 
-const expression = ref(localStorage.getItem(expressionStorageKey) || '128 * 0.85 + 12')
+function parseHistoryEntries(raw: string) {
+  try {
+    return JSON.parse(raw) as CalculatorHistoryEntry[]
+  } catch {
+    return undefined
+  }
+}
+
+const expression = ref(
+  readStorage(expressionStorageDomain, '128 * 0.85 + 12', {
+    legacyKeys: [expressionStorageKey],
+    parseLegacy: (raw) => raw,
+  })
+)
 const result = computed(() => {
   try {
     return evaluateExpression(expression.value)
@@ -23,13 +39,10 @@ const result = computed(() => {
 })
 
 const history = ref<CalculatorHistoryEntry[]>(
-  (() => {
-    try {
-      return JSON.parse(localStorage.getItem(historyStorageKey) || '[]') as CalculatorHistoryEntry[]
-    } catch {
-      return []
-    }
-  })()
+  readStorage<CalculatorHistoryEntry[]>(historyStorageDomain, [], {
+    legacyKeys: [historyStorageKey],
+    parseLegacy: (raw) => parseHistoryEntries(raw),
+  })
 )
 
 const discountPrice = ref(299)
@@ -68,13 +81,13 @@ async function copyValue(value: string, label: string) {
 }
 
 watch(expression, (value) => {
-  localStorage.setItem(expressionStorageKey, value)
+  writeStorage(expressionStorageDomain, value)
 })
 
 watch(
   history,
   (value) => {
-    localStorage.setItem(historyStorageKey, JSON.stringify(value))
+    writeStorage(historyStorageDomain, value)
   },
   { deep: true }
 )

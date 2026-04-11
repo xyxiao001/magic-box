@@ -3,6 +3,7 @@ import Prism from 'prismjs'
 import { computed, nextTick, onMounted, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { getMarkdownStats, renderMarkdown } from '@/lib/markdown'
+import { readStorage, writeStorage } from '@/lib/storage'
 import 'prismjs/components/prism-bash'
 import 'prismjs/components/prism-json'
 import 'prismjs/components/prism-markdown'
@@ -16,7 +17,13 @@ interface MdTemplate {
 }
 
 const storageKey = 'magic-box.markdown-studio.draft'
-const markdownInput = ref('# Markdown Studio\n\n在左侧编辑 Markdown，右侧实时预览。')
+const storageDomain = 'tool-history:markdown-studio:draft'
+const markdownInput = ref(
+  readStorage(storageDomain, '# Markdown Studio\n\n在左侧编辑 Markdown，右侧实时预览。', {
+    legacyKeys: [storageKey],
+    parseLegacy: (raw) => raw,
+  })
+)
 const selectedTemplate = ref('custom')
 const statusMessage = ref('')
 const statusTone = ref<'neutral' | 'success' | 'danger'>('neutral')
@@ -418,18 +425,13 @@ async function exportPng() {
 }
 
 onMounted(() => {
-  const saved = localStorage.getItem(storageKey)
-  if (saved) {
-    markdownInput.value = saved
-  }
-
   void nextTick(() => {
     renderPreview()
   })
 })
 
 watch(markdownInput, (val) => {
-  localStorage.setItem(storageKey, val)
+  writeStorage(storageDomain, val)
 })
 
 watch(htmlPreview, () => {

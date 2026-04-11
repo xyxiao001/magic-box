@@ -10,6 +10,7 @@ import {
   getContrastRatio,
   parseColorInput,
 } from '@/lib/color-tool'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 interface ColorTemplate {
   label: string
@@ -18,18 +19,30 @@ interface ColorTemplate {
 }
 
 const storageKey = 'magic-box.color-studio.state'
+const storageDomain = 'tool-history:color-studio:state'
 
-const savedState = (() => {
+function parseSavedState(raw: string) {
   try {
-    return JSON.parse(localStorage.getItem(storageKey) || '{}') as Partial<{
+    return JSON.parse(raw) as Partial<{
       colorInput: string
       gradientTarget: string
       angle: number
     }>
   } catch {
-    return {}
+    return undefined
   }
-})()
+}
+
+const savedState = readStorage<
+  Partial<{
+    colorInput: string
+    gradientTarget: string
+    angle: number
+  }>
+>(storageDomain, {}, {
+  legacyKeys: [storageKey],
+  parseLegacy: (raw) => parseSavedState(raw),
+})
 
 const colorInput = ref(savedState.colorInput || '#3366FF')
 const gradientTarget = ref(savedState.gradientTarget || '#FF7A59')
@@ -91,14 +104,11 @@ function applyTemplate(template: ColorTemplate) {
 }
 
 watch([colorInput, gradientTarget, gradientAngle], () => {
-  localStorage.setItem(
-    storageKey,
-    JSON.stringify({
-      colorInput: colorInput.value,
-      gradientTarget: gradientTarget.value,
-      angle: gradientAngle.value,
-    })
-  )
+  writeStorage(storageDomain, {
+    colorInput: colorInput.value,
+    gradientTarget: gradientTarget.value,
+    angle: gradientAngle.value,
+  })
 })
 </script>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { readStorage, writeStorage } from '@/lib/storage'
 import {
   buildWeatherForecastUrl,
   buildWeatherSearchUrl,
@@ -11,7 +12,13 @@ import {
 } from '@/lib/weather-tool'
 
 const cityStorageKey = 'magic-box.weather.city'
-const cityQuery = ref(localStorage.getItem(cityStorageKey) || 'Hangzhou')
+const cityStorageDomain = 'tool-history:weather-desk:city'
+const cityQuery = ref(
+  readStorage(cityStorageDomain, 'Hangzhou', {
+    legacyKeys: [cityStorageKey],
+    parseLegacy: (raw) => raw,
+  })
+)
 const searchResults = ref<WeatherLocation[]>([])
 const selectedLocation = ref<WeatherLocation | null>(null)
 const currentWeather = ref<WeatherCurrent | null>(null)
@@ -98,7 +105,7 @@ function useCurrentLocation() {
 }
 
 watch(cityQuery, (value) => {
-  localStorage.setItem(cityStorageKey, value)
+  writeStorage(cityStorageDomain, value)
 })
 
 void searchCity()

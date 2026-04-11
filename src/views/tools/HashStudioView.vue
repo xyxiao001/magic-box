@@ -1,14 +1,24 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { copyToClipboard } from '@/lib/clipboard'
+import ResultCard from '@/components/toolkit/ResultCard.vue'
+import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
+import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { compareTargetHash, hashFile, hashText, type HashResultRow } from '@/lib/hash-tool'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 type InputMode = 'text' | 'file'
 
 const storageKey = 'magic-box.hash-studio.text'
+const storageDomain = 'tool-history:hash-studio:text'
 const fileInput = ref<HTMLInputElement | null>(null)
 const inputMode = ref<InputMode>('text')
-const textInput = ref(localStorage.getItem(storageKey) || 'magic-box')
+const textInput = ref(
+  readStorage(storageDomain, 'magic-box', {
+    legacyKeys: [storageKey],
+    parseLegacy: (raw) => raw,
+  })
+)
 const targetHash = ref('')
 const fileMeta = ref<{ name: string; type: string; size: string } | null>(null)
 const rows = ref<HashResultRow[]>([])
@@ -72,8 +82,7 @@ function handleFileChange(event: Event) {
   target.value = ''
 }
 
-async function copyValue(value: string, label: string) {
-  const success = await copyToClipboard(value)
+function handleResultCopied(label: string, success: boolean) {
   copiedMessage.value = success ? `${label}已复制` : '当前环境不支持复制'
 
   window.setTimeout(() => {
@@ -88,7 +97,7 @@ function switchToTextMode() {
 }
 
 watch(textInput, () => {
-  localStorage.setItem(storageKey, textInput.value)
+  writeStorage(storageDomain, textInput.value)
 
   if (inputMode.value === 'text') {
     void computeTextHashes()
@@ -99,18 +108,10 @@ void computeTextHashes()
 </script>
 
 <template>
-  <section class="tool-page tool-page-hash">
-    <div class="tool-page-layout">
-      <section class="editor-pane">
-        <div class="pane-header">
-          <div>
-            <h2 class="pane-title">输入源</h2>
-            <p class="meta-hint">支持文本和单文件两种模式，全部在浏览器本地计算。</p>
-          </div>
-          <span class="workspace-chip">{{ inputMode === 'text' ? '文本模式' : '文件模式' }}</span>
-        </div>
-
-        <div class="input-toolbar">
+  <ToolPageLayout>
+    <template #editor>
+      <ToolPanel title="输入源" subtitle="支持文本和单文件两种模式，全部在浏览器本地计算。" :badge="inputMode === 'text' ? '文本模式' : '文件模式'">
+        <ToolActionBar>
           <button
             type="button"
             class="ghost-button small-button"
@@ -127,7 +128,7 @@ void computeTextHashes()
           >
             文件模式
           </button>
-        </div>
+        </ToolActionBar>
 
         <label class="field-row">
           <span class="field-label">文本输入</span>
@@ -140,12 +141,7 @@ void computeTextHashes()
           />
         </label>
 
-        <section class="http-panel">
-          <div class="result-panel-header">
-            <span class="result-panel-title">文件输入</span>
-            <span class="meta-hint">适合校验下载文件、构建产物和压缩包是否一致。</span>
-          </div>
-
+        <ToolPanel title="文件输入" subtitle="适合校验下载文件、构建产物和压缩包是否一致。">
           <div class="image-dropzone">
             <strong>{{ fileMeta ? fileMeta.name : '选择一个文件进行哈希计算' }}</strong>
             <p>{{ fileMeta ? `${fileMeta.type} · ${fileMeta.size}` : '不会上传文件，只在本地读取和计算。' }}</p>
@@ -155,7 +151,7 @@ void computeTextHashes()
             </div>
             <input ref="fileInput" class="image-file-input" type="file" @change="handleFileChange" />
           </div>
-        </section>
+        </ToolPanel>
 
         <label class="field-row">
           <span class="field-label">目标 Hash</span>
@@ -176,22 +172,12 @@ void computeTextHashes()
         >
           {{ isBusy ? '计算中...' : statusMessage }}
         </p>
-      </section>
+      </ToolPanel>
+    </template>
 
-      <section class="viewer-pane">
-        <div class="pane-header">
-          <div>
-            <h2 class="pane-title">哈希结果</h2>
-            <p class="meta-hint">先看算法和值，再用目标 hash 快速判断是否一致。</p>
-          </div>
-        </div>
-
-        <section class="http-panel">
-          <div class="result-panel-header">
-            <span class="result-panel-title">比对状态</span>
-            <span class="meta-hint">大小写不敏感，直接对比完整值。</span>
-          </div>
-
+    <template #viewer>
+      <ToolPanel title="哈希结果" subtitle="先看算法和值，再用目标 hash 快速判断是否一致。">
+        <ToolPanel title="比对状态" subtitle="大小写不敏感，直接对比完整值。">
           <div class="data-list">
             <article class="data-row">
               <div>
@@ -215,22 +201,18 @@ void computeTextHashes()
               </div>
             </article>
           </div>
-        </section>
+        </ToolPanel>
 
-        <section class="http-panel">
-          <div class="result-panel-header">
-            <span class="result-panel-title">算法结果</span>
-            <span class="meta-hint">每项都可单独复制，长度字段方便快速判断类型。</span>
-          </div>
-
+        <ToolPanel title="算法结果" subtitle="每项都可单独复制，长度字段方便快速判断类型。">
           <div v-if="rows.length" class="hash-result-list">
-            <article v-for="row in rows" :key="row.algorithm" class="hash-result-card">
-              <div class="result-panel-header">
-                <span class="result-panel-title">{{ row.algorithm }}</span>
-                <button type="button" class="ghost-button small-button" @click="copyValue(row.value, row.algorithm)">
-                  复制
-                </button>
-              </div>
+            <ResultCard
+              v-for="row in rows"
+              :key="row.algorithm"
+              :title="row.algorithm"
+              :copy-value="row.value"
+              :copy-label="`复制 ${row.algorithm}`"
+              @copied="(success) => handleResultCopied(row.algorithm, success)"
+            >
               <div class="data-list">
                 <article class="data-row">
                   <div>
@@ -240,15 +222,17 @@ void computeTextHashes()
                 </article>
               </div>
               <code class="package-command-code hash-code">{{ row.value }}</code>
-            </article>
+            </ResultCard>
           </div>
           <div v-else class="empty-panel">
             <p>输入文本或选择文件后，这里会显示结果。</p>
           </div>
-        </section>
-      </section>
-    </div>
+        </ToolPanel>
+      </ToolPanel>
+    </template>
+  </ToolPageLayout>
 
+  <section>
     <p v-if="copiedMessage" class="clipboard-toast">{{ copiedMessage }}</p>
   </section>
 </template>

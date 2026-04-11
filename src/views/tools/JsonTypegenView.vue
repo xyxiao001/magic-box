@@ -8,20 +8,33 @@ import {
   type JsonTypegenConfig,
   type TsStyle,
 } from '@/lib/json-typegen'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 type OutputTab = 'typescript' | 'zod'
 
 const inputKey = 'magic-box.json-typegen.input'
 const stateKey = 'magic-box.json-typegen.state'
+const inputDomain = 'tool-history:json-typegen:input'
+const stateDomain = 'tool-history:json-typegen:state'
 
-const jsonInput = ref(localStorage.getItem(inputKey) || '{\n  "id": 1,\n  "name": "Magic Box"\n}')
-const saved = (() => {
+function parseSavedState(raw: string) {
   try {
-    return JSON.parse(localStorage.getItem(stateKey) || '{}') as Partial<JsonTypegenConfig & { tab: OutputTab }>
+    return JSON.parse(raw) as Partial<JsonTypegenConfig & { tab: OutputTab }>
   } catch {
-    return {}
+    return undefined
   }
-})()
+}
+
+const jsonInput = ref(
+  readStorage(inputDomain, '{\n  "id": 1,\n  "name": "Magic Box"\n}', {
+    legacyKeys: [inputKey],
+    parseLegacy: (raw) => raw,
+  })
+)
+const saved = readStorage<Partial<JsonTypegenConfig & { tab: OutputTab }>>(stateDomain, {}, {
+  legacyKeys: [stateKey],
+  parseLegacy: (raw) => parseSavedState(raw),
+})
 
 const config = ref<JsonTypegenConfig>({
   rootName: saved.rootName || 'Root',
@@ -45,19 +58,16 @@ async function copyValue(value: string, label: string) {
 }
 
 watch(jsonInput, (value) => {
-  localStorage.setItem(inputKey, value)
+  writeStorage(inputDomain, value)
 })
 
 watch(
   [config, activeTab],
   () => {
-    localStorage.setItem(
-      stateKey,
-      JSON.stringify({
-        ...config.value,
-        tab: activeTab.value,
-      })
-    )
+    writeStorage(stateDomain, {
+      ...config.value,
+      tab: activeTab.value,
+    })
   },
   { deep: true }
 )
@@ -165,4 +175,3 @@ watch(
     <p v-if="toastMessage" class="clipboard-toast">{{ toastMessage }}</p>
   </section>
 </template>
-

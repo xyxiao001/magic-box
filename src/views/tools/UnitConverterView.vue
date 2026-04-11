@@ -1,19 +1,29 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
+import { readStorage, writeStorage } from '@/lib/storage'
 import { buildConvertedResults, unitCategories } from '@/lib/unit-converter'
 
 const storageKey = 'magic-box.unit-converter.state'
-const saved = (() => {
+const storageDomain = 'tool-history:unit-converter:state'
+
+function parseStoredState(raw: string) {
   try {
-    return JSON.parse(localStorage.getItem(storageKey) || '{}') as Partial<{
+    return JSON.parse(raw) as Partial<{
       category: string
       value: number
       unit: string
     }>
   } catch {
-    return {}
+    return undefined
   }
+}
+
+const saved = (() => {
+  return readStorage<Partial<{ category: string; value: number; unit: string }>>(storageDomain, {}, {
+    legacyKeys: [storageKey],
+    parseLegacy: (raw) => parseStoredState(raw),
+  })
 })()
 
 const categoryKey = ref(saved.category || 'length')
@@ -34,14 +44,11 @@ watch(categoryKey, (value) => {
 })
 
 watch([categoryKey, sourceValue, sourceUnit], () => {
-  localStorage.setItem(
-    storageKey,
-    JSON.stringify({
-      category: categoryKey.value,
-      value: sourceValue.value,
-      unit: sourceUnit.value,
-    })
-  )
+  writeStorage(storageDomain, {
+    category: categoryKey.value,
+    value: sourceValue.value,
+    unit: sourceUnit.value,
+  })
 })
 
 async function copyValue(value: string, label: string) {

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { analyzeRegex, type RegexMatchEntry } from '@/lib/regex'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 type RegexTemplateCategory = 'extract' | 'transform' | 'content' | 'cleanup'
 
@@ -22,15 +23,45 @@ interface HighlightSegment {
   zeroWidth?: boolean
 }
 
-const pattern = ref('(?<name>[a-z]+)=(\\d+)')
-const flags = ref('g')
-const replacement = ref('$<name>: $2')
-const testText = ref(`count=42
+const regexStateDomain = 'tool-history:regex-workbench:state'
+
+function parseSavedState(raw: string) {
+  try {
+    return JSON.parse(raw) as Partial<{
+      pattern: string
+      flags: string
+      replacement: string
+      testText: string
+      exampleSearch: string
+      activeCategory: 'all' | RegexTemplateCategory
+    }>
+  } catch {
+    return undefined
+  }
+}
+
+const savedState = readStorage<
+  Partial<{
+    pattern: string
+    flags: string
+    replacement: string
+    testText: string
+    exampleSearch: string
+    activeCategory: 'all' | RegexTemplateCategory
+  }>
+>(regexStateDomain, {}, {
+  parseLegacy: (raw) => parseSavedState(raw),
+})
+
+const pattern = ref(savedState.pattern ?? '(?<name>[a-z]+)=(\\d+)')
+const flags = ref(savedState.flags ?? 'g')
+const replacement = ref(savedState.replacement ?? '$<name>: $2')
+const testText = ref(savedState.testText ?? `count=42
 user=7
 level=3`)
 const copiedMessage = ref('')
-const exampleSearch = ref('')
-const activeCategory = ref<'all' | RegexTemplateCategory>('all')
+const exampleSearch = ref(savedState.exampleSearch ?? '')
+const activeCategory = ref<'all' | RegexTemplateCategory>(savedState.activeCategory ?? 'all')
 
 const categoryMeta = {
   all: { label: '全部', hint: '所有模板' },
@@ -247,6 +278,17 @@ function applyExample(example: RegexTemplate) {
   replacement.value = example.replacement
   testText.value = example.testText
 }
+
+watch([pattern, flags, replacement, testText, exampleSearch, activeCategory], () => {
+  writeStorage(regexStateDomain, {
+    pattern: pattern.value,
+    flags: flags.value,
+    replacement: replacement.value,
+    testText: testText.value,
+    exampleSearch: exampleSearch.value,
+    activeCategory: activeCategory.value,
+  })
+})
 
 function isActiveExample(example: RegexTemplate) {
   return (

@@ -1,13 +1,36 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import JsonTreeNode from '@/components/JsonTreeNode.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { convertJsonToJsObject, formatJson, minifyJson, parseJsonValue, validateJson } from '@/lib/json-tool'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 type OutputType = 'json' | 'js-object' | 'message' | 'empty'
 type OutputTab = 'text' | 'tree'
 
-const jsonInput = ref(`{
+const jsonToolkitStateDomain = 'tool-history:json-toolkit:state'
+
+function parseSavedState(raw: string) {
+  try {
+    return JSON.parse(raw) as Partial<{
+      input: string
+      outputTab: OutputTab
+    }>
+  } catch {
+    return undefined
+  }
+}
+
+const savedState = readStorage<
+  Partial<{
+    input: string
+    outputTab: OutputTab
+  }>
+>(jsonToolkitStateDomain, {}, {
+  parseLegacy: (raw) => parseSavedState(raw),
+})
+
+const jsonInput = ref(savedState.input ?? `{
   "requestId": "req_01HV7Y9K2X8MABCD",
   "success": true,
   "timestamp": "2026-04-11T13:20:00.000Z",
@@ -79,7 +102,7 @@ const jsonInput = ref(`{
 }`)
 const jsonOutput = ref('')
 const outputType = ref<OutputType>('empty')
-const outputTab = ref<OutputTab>('text')
+const outputTab = ref<OutputTab>(savedState.outputTab ?? 'text')
 const structuredOutput = ref<unknown | null>(null)
 const hasStructuredOutput = ref(false)
 const treeOpenDepth = ref(1)
@@ -105,6 +128,13 @@ const outputMetrics = computed(() => {
     `${text.split('\n').length} 行`,
     outputType.value === 'js-object' ? 'JS 对象' : 'JSON 文本',
   ]
+})
+
+watch([jsonInput, outputTab], () => {
+  writeStorage(jsonToolkitStateDomain, {
+    input: jsonInput.value,
+    outputTab: outputTab.value,
+  })
 })
 
 function applyStatus(message: string, tone: 'neutral' | 'success' | 'danger') {

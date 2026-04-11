@@ -8,14 +8,16 @@ import {
   type CanonicalOptions,
   type HmacOutputFormat,
 } from '@/lib/hmac-tool'
+import { readStorage, writeStorage } from '@/lib/storage'
 
 type Mode = 'basic' | 'request'
 
 const stateKey = 'magic-box.hmac-signer.state'
+const stateDomain = 'tool-history:hmac-signer:state'
 
-const saved = (() => {
+function parseSavedState(raw: string) {
   try {
-    return JSON.parse(localStorage.getItem(stateKey) || '{}') as Partial<{
+    return JSON.parse(raw) as Partial<{
       mode: Mode
       secret: string
       message: string
@@ -33,9 +35,32 @@ const saved = (() => {
       persistSecret: boolean
     }>
   } catch {
-    return {}
+    return undefined
   }
-})()
+}
+
+const saved = readStorage<
+  Partial<{
+    mode: Mode
+    secret: string
+    message: string
+    format: HmacOutputFormat
+    target: string
+    options: CanonicalOptions
+    request: {
+      method: string
+      path: string
+      query: string
+      timestamp: string
+      nonce: string
+      body: string
+    }
+    persistSecret: boolean
+  }>
+>(stateDomain, {}, {
+  legacyKeys: [stateKey],
+  parseLegacy: (raw) => parseSavedState(raw),
+})
 
 const mode = ref<Mode>(saved.mode || 'basic')
 const persistSecret = ref(Boolean(saved.persistSecret))
@@ -107,19 +132,16 @@ async function copyValue(value: string, label: string) {
 }
 
 watch([mode, secret, message, outputFormat, targetSignature, canonicalOptions, requestInput, persistSecret], () => {
-  localStorage.setItem(
-    stateKey,
-    JSON.stringify({
-      mode: mode.value,
-      persistSecret: persistSecret.value,
-      secret: persistSecret.value ? secret.value : '',
-      message: message.value,
-      format: outputFormat.value,
-      target: targetSignature.value,
-      options: canonicalOptions.value,
-      request: requestInput.value,
-    })
-  )
+  writeStorage(stateDomain, {
+    mode: mode.value,
+    persistSecret: persistSecret.value,
+    secret: persistSecret.value ? secret.value : '',
+    message: message.value,
+    format: outputFormat.value,
+    target: targetSignature.value,
+    options: canonicalOptions.value,
+    request: requestInput.value,
+  })
 
   void recompute()
 }, { deep: true })
@@ -312,4 +334,3 @@ void recompute()
     <p v-if="toastMessage" class="clipboard-toast">{{ toastMessage }}</p>
   </section>
 </template>
-

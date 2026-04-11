@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { readStorage, writeStorage } from '@/lib/storage'
 import {
   buildOutputFileName,
   calculateImageTransform,
@@ -18,6 +19,7 @@ interface ImagePreset {
 }
 
 const configStorageKey = 'magic-box.image-studio.config'
+const configStorageDomain = 'tool-history:image-studio:config'
 const fileInput = ref<HTMLInputElement | null>(null)
 const sourceName = ref('')
 const sourceUrl = ref('')
@@ -29,18 +31,30 @@ const statusTone = ref<'neutral' | 'success' | 'danger'>('neutral')
 const isProcessing = ref(false)
 const isDragging = ref(false)
 
-const savedConfig = (() => {
+function parseSavedConfig(raw: string) {
   try {
-    return JSON.parse(localStorage.getItem(configStorageKey) || '{}') as Partial<{
+    return JSON.parse(raw) as Partial<{
       format: OutputImageFormat
       quality: number
       scale: number
       crop: CropRatioPreset
     }>
   } catch {
-    return {}
+    return undefined
   }
-})()
+}
+
+const savedConfig = readStorage<
+  Partial<{
+    format: OutputImageFormat
+    quality: number
+    scale: number
+    crop: CropRatioPreset
+  }>
+>(configStorageDomain, {}, {
+  legacyKeys: [configStorageKey],
+  parseLegacy: (raw) => parseSavedConfig(raw),
+})
 
 const outputFormat = ref<OutputImageFormat>(savedConfig.format || 'image/webp')
 const quality = ref(Number(savedConfig.quality || 86))
@@ -253,15 +267,12 @@ function downloadOutput() {
 }
 
 watch([outputFormat, quality, scale, cropRatio], () => {
-  localStorage.setItem(
-    configStorageKey,
-    JSON.stringify({
-      format: outputFormat.value,
-      quality: quality.value,
-      scale: scale.value,
-      crop: cropRatio.value,
-    })
-  )
+  writeStorage(configStorageDomain, {
+    format: outputFormat.value,
+    quality: quality.value,
+    scale: scale.value,
+    crop: cropRatio.value,
+  })
 
   if (sourceUrl.value) {
     void processImage()
