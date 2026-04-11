@@ -67,11 +67,12 @@ describe('toolkit components', () => {
   it('renders capability tag labels', () => {
     const wrapper = mount(ToolTagList, {
       props: {
-        tags: ['offline-ready', 'history-supported'],
+        tags: ['offline-ready', 'history-supported', 'favorite-supported'],
       },
     })
 
     expect(wrapper.text()).toContain('Offline Ready')
-    expect(wrapper.text()).toContain('History Supported')
+    expect(wrapper.text()).not.toContain('History Supported')
+    expect(wrapper.text()).not.toContain('Favorite Supported')
   })
 })

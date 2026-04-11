@@ -12,20 +12,26 @@ const props = withDefaults(
   }
 )
 
-const tagLabels: Record<ToolCapabilityTag, string> = {
+const userFacingTagLabels: Partial<Record<ToolCapabilityTag, string>> = {
   'offline-ready': 'Offline Ready',
   'network-required': 'Network Required',
   'local-processing': 'Local Processing',
   beta: 'Beta',
-  'favorite-supported': 'Favorite Supported',
-  'history-supported': 'History Supported',
 }
 
 const visibleTags = computed(() =>
-  props.tags.map((tag) => ({
-    id: tag,
-    label: tagLabels[tag],
-  }))
+  props.tags.flatMap((tag) => {
+    const label = userFacingTagLabels[tag]
+
+    return label
+      ? [
+          {
+            id: tag,
+            label,
+          },
+        ]
+      : []
+  })
 )
 </script>
 
