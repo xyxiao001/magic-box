@@ -50,13 +50,24 @@
 - White Noise Studio
 - Clipboard History
 
-## Phase 9: Planned
+## Phase 9: Completed Expansion
 
 - Request Converter
 - Header & Cookie Lab
 - JSON Typegen
 - WebSocket Lab
 - HMAC Signer
+
+## Phase 10: Planned
+
+- URL Inspector
+- Text Toolkit
+- JWT Sign / Verify
+- JSON Diff / JSONPath
+- UUID / NanoID Studio
+- CSV Toolkit
+- SQL Formatter
+- Password Generator
 
 ## 当前状态
 
@@ -84,11 +95,14 @@
 
 下一批建议：
 
-- `Request Converter`：联调最常见入口，能直接把 cURL 变成可运行代码
-- `Header & Cookie Lab`：排障高频，尤其是鉴权、跨域、缓存、灰度链路
-- `JSON Typegen`：前后端都刚需，生成 TS/Zod 省大量重复劳动
-- `WebSocket Lab`：实时链路联调工具，常见但缺轻量替代
-- `HMAC Signer`：网关签名/Webhook 验签场景很高频，能显著降低排查成本
+- `URL Inspector`：和 `HTTP Lab`、`Request Converter`、`Header & Cookie Lab` 联动最强
+- `Text Toolkit`：覆盖面最大，开发和非开发都能直接使用
+- `JWT Sign / Verify`：补齐 `JWT Studio` 的生成、解析、验签闭环
+- `JSON Diff / JSONPath`：接口联调、配置排查和响应体分析高频场景
+- `UUID / NanoID Studio`：实现简单、使用高频，适合快速补位
+- `CSV Toolkit`：可覆盖开发、测试、运营、产品等更广用户群
+- `SQL Formatter`：典型刚需，且适合本地处理
+- `Password Generator`：简单实用，补齐基础工具集
 
 ## 开发流程
 

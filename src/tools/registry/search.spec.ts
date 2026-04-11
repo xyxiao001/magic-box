@@ -9,6 +9,26 @@ describe('tool search ranking', () => {
     expect(results[0]?.id).toBe('time-lab')
   })
 
+  it('surfaces url inspector for query and callback searches', () => {
+    expect(searchToolDefinitions(toolDefinitions, 'query')[0]?.id).toBe('url-inspector')
+    expect(searchToolDefinitions(toolDefinitions, 'callback')[0]?.id).toBe('url-inspector')
+  })
+
+  it('surfaces text toolkit for text cleanup searches', () => {
+    expect(searchToolDefinitions(toolDefinitions, 'text')[0]?.id).toBe('text-toolkit')
+    expect(searchToolDefinitions(toolDefinitions, 'dedupe')[0]?.id).toBe('text-toolkit')
+  })
+
+  it('surfaces jwt sign verify for sign and verify searches', () => {
+    expect(searchToolDefinitions(toolDefinitions, 'sign')[0]?.id).toBe('jwt-sign-verify')
+    expect(searchToolDefinitions(toolDefinitions, 'verify')[0]?.id).toBe('jwt-sign-verify')
+  })
+
+  it('surfaces uuid studio for uuid and nanoid searches', () => {
+    expect(searchToolDefinitions(toolDefinitions, 'uuid')[0]?.id).toBe('uuid-studio')
+    expect(searchToolDefinitions(toolDefinitions, 'nanoid')[0]?.id).toBe('uuid-studio')
+  })
+
   it('prefers favorites and recent usage in empty search ordering', () => {
     const results = searchToolDefinitions(toolDefinitions, '', {
       favoriteToolIds: ['request-converter'],

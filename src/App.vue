@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import ToolTagList from '@/components/toolkit/ToolTagList.vue'
 import { toolModules } from '@/data/tool-modules'
-import { orderModulesByPreference } from '@/lib/toolbox'
+import { orderModulesByFavorite, orderModulesByPreference } from '@/lib/toolbox'
 import { useWorkbenchStore } from '@/stores/workbench'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -40,7 +40,7 @@ const isCurrentModuleFavorite = computed(() => {
 })
 
 const navigationModules = computed(() =>
-  orderModulesByPreference(toolModules, workbenchStore.favoriteModuleIds, '', workbenchStore.recentTools)
+  orderModulesByFavorite(toolModules, workbenchStore.favoriteModuleIds)
 )
 
 const searchResults = computed(() =>

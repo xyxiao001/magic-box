@@ -59,8 +59,9 @@ async function handleCopy() {
   gap: 0.875rem;
   padding: 1rem;
   border-radius: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  background: rgba(15, 23, 42, 0.32);
+  border: 1px solid var(--result-card-border);
+  background: var(--result-card-bg);
+  color: var(--text);
 }
 
 .result-card[data-tone='success'] {

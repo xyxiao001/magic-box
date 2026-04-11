@@ -5,6 +5,11 @@ const aliasGroups = [
   ['二维码', 'qr', 'qr-code', 'qrcode'],
   ['请求头', 'header'],
   ['编解码', 'encode', 'decode'],
+  ['url', 'query', 'params', '链接', 'callback', 'redirect'],
+  ['text', 'trim', 'dedupe', 'sort', '文本', '空白', '行处理'],
+  ['jwt', 'token'],
+  ['sign', 'verify', '验签', '签发', 'hs256'],
+  ['uuid', 'nanoid', 'identifier', 'id', '标识', '随机 id'],
 ] as const
 
 export interface ToolSearchContext {

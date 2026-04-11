@@ -20,7 +20,15 @@ export interface ParsedJwtResult {
   timeRows: JwtTimeRow[]
 }
 
-function decodeBase64Url(input: string) {
+export interface JwtSignVerifyResult {
+  ok: boolean
+  error?: string
+  token: string
+  signature: string
+  verified: boolean
+}
+
+export function decodeBase64Url(input: string) {
   const normalized = input.replaceAll('-', '+').replaceAll('_', '/')
   const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=')
 
@@ -33,7 +41,7 @@ function decodeBase64Url(input: string) {
   return Buffer.from(padded, 'base64').toString('utf8')
 }
 
-function encodeBase64Url(input: string) {
+export function encodeBase64Url(input: string) {
   if (typeof btoa === 'function') {
     const bytes = new TextEncoder().encode(input)
     let binary = ''
@@ -45,6 +53,43 @@ function encodeBase64Url(input: string) {
   }
 
   return Buffer.from(input, 'utf8')
+    .toString('base64')
+    .replaceAll('+', '-')
+    .replaceAll('/', '_')
+    .replaceAll(/=+$/g, '')
+}
+
+async function computeHs256Signature(signingInput: string, secret: string) {
+  const cryptoApi = globalThis.crypto
+
+  if (!cryptoApi?.subtle) {
+    throw new Error('当前环境不支持 Web Crypto')
+  }
+
+  const key = await cryptoApi.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    {
+      name: 'HMAC',
+      hash: 'SHA-256',
+    },
+    false,
+    ['sign']
+  )
+
+  const signature = await cryptoApi.subtle.sign('HMAC', key, new TextEncoder().encode(signingInput))
+  const bytes = new Uint8Array(signature)
+  let binary = ''
+
+  bytes.forEach((byte) => {
+    binary += String.fromCharCode(byte)
+  })
+
+  if (typeof btoa === 'function') {
+    return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll(/=+$/g, '')
+  }
+
+  return Buffer.from(bytes)
     .toString('base64')
     .replaceAll('+', '-')
     .replaceAll('/', '_')
@@ -91,6 +136,133 @@ export function buildUnsignedJwt(
     encodeBase64Url(JSON.stringify(payload)),
     signature,
   ].join('.')
+}
+
+export function parseJwtJsonInput(input: string, fallback: Record<string, unknown>) {
+  const trimmed = input.trim()
+
+  if (!trimmed) {
+    return {
+      ok: true,
+      value: fallback,
+    }
+  }
+
+  try {
+    const parsed = JSON.parse(trimmed) as unknown
+    const normalized = normalizeRecord(parsed)
+
+    if (!normalized) {
+      throw new Error('JSON 必须是对象')
+    }
+
+    return {
+      ok: true,
+      value: normalized,
+    }
+  } catch {
+    return {
+      ok: false,
+      error: '请输入合法 JSON 对象',
+      value: fallback,
+    }
+  }
+}
+
+export async function signJwtHs256(
+  header: Record<string, unknown>,
+  payload: Record<string, unknown>,
+  secret: string
+): Promise<JwtSignVerifyResult> {
+  const normalizedSecret = secret.trim()
+
+  if (!normalizedSecret) {
+    return {
+      ok: false,
+      error: '请输入 secret',
+      token: '',
+      signature: '',
+      verified: false,
+    }
+  }
+
+  try {
+    const encodedHeader = encodeBase64Url(JSON.stringify(header))
+    const encodedPayload = encodeBase64Url(JSON.stringify(payload))
+    const signingInput = `${encodedHeader}.${encodedPayload}`
+    const signature = await computeHs256Signature(signingInput, normalizedSecret)
+
+    return {
+      ok: true,
+      token: `${signingInput}.${signature}`,
+      signature,
+      verified: true,
+    }
+  } catch {
+    return {
+      ok: false,
+      error: '签发失败，请确认当前环境支持 Web Crypto',
+      token: '',
+      signature: '',
+      verified: false,
+    }
+  }
+}
+
+export async function verifyJwtHs256(token: string, secret: string): Promise<JwtSignVerifyResult> {
+  const trimmed = token.trim()
+  const normalizedSecret = secret.trim()
+
+  if (!trimmed) {
+    return {
+      ok: false,
+      error: '请输入 JWT',
+      token: '',
+      signature: '',
+      verified: false,
+    }
+  }
+
+  if (!normalizedSecret) {
+    return {
+      ok: false,
+      error: '请输入 secret',
+      token: trimmed,
+      signature: '',
+      verified: false,
+    }
+  }
+
+  const parts = trimmed.split('.')
+
+  if (parts.length !== 3) {
+    return {
+      ok: false,
+      error: 'JWT 应该由 header.payload.signature 三段组成',
+      token: trimmed,
+      signature: '',
+      verified: false,
+    }
+  }
+
+  try {
+    const expectedSignature = await computeHs256Signature(`${parts[0]}.${parts[1]}`, normalizedSecret)
+
+    return {
+      ok: true,
+      token: trimmed,
+      signature: expectedSignature,
+      verified: expectedSignature === parts[2],
+    }
+  } catch {
+    return {
+      ok: false,
+      error: '验签失败，请确认当前环境支持 Web Crypto',
+      token: trimmed,
+      signature: '',
+      verified: false,
+    }
+  }
 }
 
 export function parseJwt(token: string, nowMs = Date.now()): ParsedJwtResult {

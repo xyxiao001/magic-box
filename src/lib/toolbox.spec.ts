@@ -15,6 +15,17 @@ describe('toolbox helpers', () => {
     expect(ordered).toHaveLength(toolModules.length)
   })
 
+  it('keeps navigation order stable after favorites', () => {
+    const ordered = orderModulesByFavorite(toolModules, ['request-converter', 'codec-lab'])
+
+    expect(ordered.slice(0, 4).map((module) => module.id)).toEqual([
+      'codec-lab',
+      'request-converter',
+      'json-toolkit',
+      'qrcode-studio',
+    ])
+  })
+
   it('filters modules by search query', () => {
     const ordered = filterModulesBySearch(toolModules, 'json')
 
@@ -30,12 +41,16 @@ describe('toolbox helpers', () => {
       'qrcode-studio',
       'diff-studio',
       'markdown-studio',
+      'text-toolkit',
       'http-lab',
       'request-converter',
+      'url-inspector',
       'json-typegen',
       'regex-workbench',
       'jwt-studio',
+      'jwt-sign-verify',
       'hash-studio',
+      'uuid-studio',
       'header-cookie-lab',
       'websocket-lab',
       'hmac-signer',
@@ -53,6 +68,6 @@ describe('toolbox helpers', () => {
   })
 
   it('counts tool modules', () => {
-    expect(getToolCount(toolModules)).toBe(24)
+    expect(getToolCount(toolModules)).toBe(28)
   })
 })

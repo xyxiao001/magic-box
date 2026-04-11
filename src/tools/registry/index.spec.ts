@@ -40,10 +40,10 @@ describe('tool registry', () => {
   })
 
   it('looks up tool definitions by id', () => {
-    expect(getToolDefinitionById('request-converter')).toMatchObject({
-      id: 'request-converter',
-      path: '/tools/request-converter',
-      title: 'Request Converter',
+    expect(getToolDefinitionById('uuid-studio')).toMatchObject({
+      id: 'uuid-studio',
+      path: '/tools/uuid-studio',
+      title: 'UUID / NanoID Studio',
     })
   })
 })
