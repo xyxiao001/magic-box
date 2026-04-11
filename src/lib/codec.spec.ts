@@ -17,6 +17,17 @@ describe('codec helpers', () => {
     expect(result).toEqual({
       ok: true,
       value: '你好',
+      iterations: 1,
+    })
+  })
+
+  it('fully decodes multi-layer url encoded text', () => {
+    const result = transformCodec('%2525E4%2525BD%2525A0%2525E5%2525A5%2525BD', 'url', 'decode-all')
+
+    expect(result).toEqual({
+      ok: true,
+      value: '你好',
+      iterations: 3,
     })
   })
 })

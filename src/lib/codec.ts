@@ -1,3 +1,13 @@
+export type CodecMode = 'base64' | 'url'
+export type CodecAction = 'encode' | 'decode' | 'decode-all'
+
+export interface CodecResult {
+  ok: boolean
+  value?: string
+  error?: string
+  iterations?: number
+}
+
 function safeEncodeBase64(value: string) {
   const bytes = new TextEncoder().encode(value)
   const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join('')
@@ -12,11 +22,32 @@ function safeDecodeBase64(value: string) {
   return new TextDecoder().decode(bytes)
 }
 
+function decodeUrlRepeatedly(value: string, maxIterations = 10) {
+  let current = value
+  let iterations = 0
+
+  while (iterations < maxIterations) {
+    const decoded = decodeURIComponent(current)
+
+    if (decoded === current) {
+      break
+    }
+
+    current = decoded
+    iterations += 1
+  }
+
+  return {
+    value: current,
+    iterations,
+  }
+}
+
 export function transformCodec(
   value: string,
-  mode: 'base64' | 'url',
-  action: 'encode' | 'decode'
-) {
+  mode: CodecMode,
+  action: CodecAction
+): CodecResult {
   try {
     if (mode === 'base64') {
       return {
@@ -25,9 +56,28 @@ export function transformCodec(
       }
     }
 
+    if (action === 'encode') {
+      return {
+        ok: true,
+        value: encodeURIComponent(value),
+        iterations: 1,
+      }
+    }
+
+    if (action === 'decode') {
+      return {
+        ok: true,
+        value: decodeURIComponent(value),
+        iterations: 1,
+      }
+    }
+
+    const result = decodeUrlRepeatedly(value)
+
     return {
       ok: true,
-      value: action === 'encode' ? encodeURIComponent(value) : decodeURIComponent(value),
+      value: result.value,
+      iterations: result.iterations,
     }
   } catch (error) {
     return {
