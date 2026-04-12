@@ -19,8 +19,8 @@ describe('tool registry', () => {
     const visibleTools = getVisibleToolDefinitions()
 
     expect(visibleTools).toHaveLength(toolDefinitions.length)
-    expect(visibleTools[0]?.id).toBe('json-toolkit')
-    expect(visibleTools.at(-1)?.id).toBe('white-noise-studio')
+    expect(visibleTools[0]?.id).toBe('qrcode-studio')
+    expect(visibleTools.at(-1)?.id).toBe('weather-desk')
   })
 
   it('creates lazy routes from tool definitions', () => {

@@ -15,7 +15,7 @@
 1. 先确认是否需要 spec
 2. 明确本次范围、不做什么、验收标准
 3. 实现 `src/lib/` 中的核心逻辑
-4. 实现 `src/views/tools/` 或相关 UI 接入
+4. 实现 `src/modules/<group>/<tool>/` 中的页面与模块接入
 5. 更新注册表、搜索、文档
 6. 做最小充分验证
 7. 提交前检查 README / roadmap / spec 是否需要回写
@@ -41,9 +41,9 @@
 ### 编码顺序
 
 - 先补 `src/lib/` 中的纯函数或核心处理逻辑
-- 再补 `src/views/tools/` 中的工具页面
-- 再接入 `src/tools/registry/definitions.ts`
-- 如有必要，补 `src/tools/registry/search.ts` 中的搜索关键词或别名
+- 再补 `src/modules/<group>/<tool>/` 中的 `page.vue`、`module.ts`、`meta.ts`
+- 再接入 `src/platform/tool-registry/definitions.ts`
+- 如有必要，补 `src/platform/tool-registry/` 中的搜索或定义相关测试
 - 如有必要，补对应测试文件
 
 ### 文档回写
@@ -123,10 +123,11 @@
 
 默认按以下位置落代码：
 
-- 工具页面：`src/views/tools/`
+- 工具页面与模块：`src/modules/<group>/<tool>/`
 - 核心逻辑与纯函数：`src/lib/`
-- 注册表与搜索：`src/tools/registry/`
+- 注册表与搜索：`src/platform/tool-registry/`、`src/tools/registry/`
 - 通用组件：`src/components/toolkit/`
+- runtime 与脚手架：`src/tool-runtime/`
 - 规划与功能说明：`docs/specs/`
 
 不要把大量业务逻辑直接堆进页面组件；优先抽到 `src/lib/`。
@@ -157,7 +158,7 @@
 
 编码后：
 
-- `src/lib/` 和 `src/views/tools/` 是否职责分离？
+- `src/lib/` 和 `src/modules/` 是否职责分离？
 - 注册表和搜索是否已接入？
 
 提交前：

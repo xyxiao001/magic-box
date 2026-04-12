@@ -92,9 +92,11 @@ pnpm check
 
 ## 目录结构
 
-- `src/views/tools/`：所有工具页面入口
+- `src/modules/`：工具模块目录，按领域拆分页面、meta、module 与测试
 - `src/lib/`：可测试的纯函数、解析逻辑和核心能力
-- `src/tools/registry/`：工具注册表、搜索与路由生成
+- `src/platform/tool-registry/`：平台级工具注册、搜索与定义构建
+- `src/tools/registry/`：对外兼容的注册表导出入口
+- `src/tool-runtime/`：工具运行时、脚手架与通用能力
 - `src/components/toolkit/`：工具页复用组件
 - `src/router/`：应用路由与默认跳转
 - `src/data/`：文档页等静态数据
@@ -117,7 +119,7 @@ pnpm check
 
 1. 在 `docs/specs/` 新建或更新功能 spec
 2. 明确范围、输入输出和验收标准
-3. 在 `src/lib/`、`src/views/tools/`、`src/tools/registry/` 等目录实现
+3. 在 `src/lib/`、`src/modules/`、`src/platform/tool-registry/` 等目录实现
 4. 运行 `lint`、`typecheck`、`test` 等校验
 5. 完成后回写文档与后续迭代点
 

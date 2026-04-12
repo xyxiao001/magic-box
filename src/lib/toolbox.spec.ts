@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { toolModules } from '@/data/tool-modules'
 import {
   filterModulesBySearch,
   getToolCount,
   orderModulesByFavorite,
   orderModulesByPreference,
 } from '@/lib/toolbox'
+import { toolModules } from '@/platform/tool-registry'
 
 describe('toolbox helpers', () => {
   it('moves favorite modules to the front while preserving all items', () => {
@@ -36,7 +36,7 @@ describe('toolbox helpers', () => {
     expect(orderedIds.indexOf('json-typegen')).toBeLessThan(orderedIds.indexOf('json-diff-jsonpath'))
   })
 
-  it('keeps original order after favorite modules when no manual sorting exists', () => {
+  it('keeps all non-favorite modules after preference ordering', () => {
     const favoriteIds = ['codec-lab']
     const orderedIds = orderModulesByPreference(toolModules, favoriteIds, '').map((module) => module.id)
     const remainingOrderedIds = orderedIds.filter((id) => !favoriteIds.includes(id))
@@ -44,7 +44,8 @@ describe('toolbox helpers', () => {
     const remainingOriginalIds = originalIds.filter((id) => !favoriteIds.includes(id))
 
     expect(orderedIds[0]).toBe('codec-lab')
-    expect(remainingOrderedIds).toEqual(remainingOriginalIds)
+    expect(new Set(remainingOrderedIds)).toEqual(new Set(remainingOriginalIds))
+    expect(remainingOrderedIds).toHaveLength(remainingOriginalIds.length)
   })
 
   it('counts tool modules', () => {

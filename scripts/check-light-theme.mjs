@@ -4,7 +4,7 @@ import { readdir, readFile } from 'node:fs/promises'
 import path from 'node:path'
 
 const rootDir = process.cwd()
-const targetDir = path.resolve(rootDir, process.argv[2] ?? 'src/views/tools')
+const targetDir = path.resolve(rootDir, process.argv[2] ?? 'src/modules')
 
 const darkPatterns = [
   /rgba\(15,\s*23,\s*42/i,

@@ -3,8 +3,9 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useRegisterSW } from 'virtual:pwa-register/vue'
 import ToolTagList from '@/components/toolkit/ToolTagList.vue'
-import { toolModules } from '@/data/tool-modules'
 import { orderModulesByFavorite, orderModulesByPreference } from '@/lib/toolbox'
+import { toolModules } from '@/platform/tool-registry'
+import AppMessageStack from '@/shared/components/feedback/AppMessageStack.vue'
 import { useWorkbenchStore } from '@/stores/workbench'
 
 interface BeforeInstallPromptEvent extends Event {
@@ -532,5 +533,7 @@ onBeforeUnmount(() => {
         <p v-else class="palette-empty">没有匹配工具，试试 `json`、`time` 或 `base64`。</p>
       </section>
     </div>
+
+    <AppMessageStack />
   </div>
 </template>

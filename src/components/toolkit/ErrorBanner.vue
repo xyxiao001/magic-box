@@ -21,7 +21,7 @@ defineProps<{
   padding: 0.875rem 1rem;
   border: 1px solid rgba(255, 120, 120, 0.24);
   border-radius: 14px;
-  background: rgba(127, 29, 29, 0.18);
+  background: var(--error-card-bg);
   color: #ffd9d9;
 }
 

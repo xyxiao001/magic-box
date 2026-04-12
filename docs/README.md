@@ -11,6 +11,7 @@
 ## 目录约定
 
 - `architecture.md`：工程结构、模块边界、设计原则
+- `architecture-refactor.md`：目标态架构与渐进迁移方案
 - `roadmap.md`：阶段路线图
 - `specs/`：功能 spec
 

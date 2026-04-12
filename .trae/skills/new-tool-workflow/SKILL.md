@@ -1,228 +1,248 @@
 ---
 name: "new-tool-workflow"
-description: "Creates new tool workflow guidance for Magic Box. Invoke when adding a new tool, planning a tool batch, or when the user asks to follow the project new-tool flow."
+description: "Magic Box 新工具工作流说明。新增工具、批量规划工具、或用户明确要求遵循项目新工具流程时使用。"
 ---
 
 # New Tool Workflow
 
-Use this skill when the task is about adding one or more new tools to Magic Box, extending the tool matrix, or explicitly following the project's new-tool process.
+当任务涉及以下场景时，使用这个 skill：
 
-This skill is project-specific. It assumes the repository uses:
+- 为 Magic Box 新增一个或多个工具
+- 批量实现一组 roadmap 工具
+- 用户明确要求遵循项目的新工具工作流
+- 将规划中的工具正式落地为可用实现
 
-- `docs/specs/` for feature specs
-- `src/lib/` for core logic
-- `src/views/tools/` for tool pages
-- `src/tools/registry/` for tool registration and search
-- `README.md` and `docs/roadmap.md` as required sync targets
+这是一个项目定制 skill，默认基于当前仓库结构工作：
 
-## When To Invoke
+- `docs/specs/`：功能 spec
+- `src/lib/`：核心逻辑、纯函数、解析与转换
+- `src/modules/<group>/<tool>/`：工具模块实现
+- `src/platform/tool-registry/`：平台注册表与定义构建
+- `src/tools/registry/`：对外兼容导出入口
+- `src/tool-runtime/`：runtime、脚手架与通用能力
+- `README.md`、`docs/roadmap.md`：必须检查是否需要回写的文档
 
-Invoke this skill when:
+## 何时调用
 
-- the user asks to add a new tool
-- the user asks to implement multiple tools in a batch
-- the user asks to follow the project's tool creation workflow
-- a planned tool from `docs/roadmap.md` is being turned into a real implementation
+以下情况应调用：
 
-Do not invoke this skill for:
+- 用户要求新增一个工具
+- 用户要求批量实现多个工具
+- 用户要求“按项目新工具流程来”
+- `docs/roadmap.md` 中某个 planned 工具要正式实现
 
-- small fixes inside an existing tool unless the user is effectively turning it into a new tool scope
-- pure documentation edits with no new tool work
-- simple refactors unrelated to tool creation
+以下情况不要调用：
 
-## Core Rule
+- 只是现有工具的小修小补，且范围没有实质升级为“新工具”
+- 纯文档编辑，没有新增工具工作
+- 与工具新增无关的简单重构
 
-For Magic Box, new tools must follow this order:
+## 核心规则
 
-1. write spec
-2. confirm scope
-3. implement core logic
-4. implement tool page
-5. register tool
-6. update docs
-7. validate
-8. commit
+Magic Box 的新工具默认遵循这个顺序：
 
-Never jump directly to implementation before the spec is in place unless the user explicitly overrides the project rule.
+1. 先写 spec
+2. 明确范围
+3. 实现核心逻辑
+4. 实现模块页面
+5. 注册工具
+6. 同步文档
+7. 做验证
+8. 如有需要再提交
 
-## Step 1: Spec First
+除非用户明确要求跳过，否则不要在没有 spec 的情况下直接开始一个全新工具。
 
-Before coding, check whether a spec already exists in `docs/specs/`.
+## 第 1 步：Spec First
 
-If no suitable spec exists:
+编码前，先检查 `docs/specs/` 中是否已经有合适的 spec。
 
-- create a new numbered spec file
-- follow `docs/specs/templates/feature-spec-template.md`
-- cover at least:
-  - background
-  - user story
-  - scope
-  - non-goals
-  - interaction and page structure
-  - data and state
-  - acceptance criteria
-  - risks and open questions
+如果没有：
 
-If the user asks to "start implementation now" but the tool is net new, first create the spec unless they explicitly say to skip it.
+- 新建一个递增编号的 spec 文件
+- 基于 `docs/specs/templates/feature-spec-template.md`
+- 至少覆盖：
+  - 背景
+  - 用户故事
+  - 本次范围
+  - 不做什么
+  - 页面与交互
+  - 数据与状态
+  - 验收标准
+  - 风险与待确认问题
 
-## Step 2: Scope The Tool
+如果用户说“先开始实现”，但这是一个净新增工具，默认仍先补 spec，除非用户明确要求跳过。
 
-Clarify the first version before coding.
+## 第 2 步：明确范围
 
-Focus on:
+编码前先把 v1 范围缩清楚。
 
-- who uses the tool
-- what the most common input is
-- what the output should look like
-- what is intentionally excluded from v1
-- whether the tool is local-first or network-required
-- whether the tool should link to adjacent tools
+重点确认：
 
-When in doubt, prefer a small and coherent first version over a broad one.
+- 谁会用这个工具
+- 最常见输入是什么
+- 期望输出长什么样
+- v1 明确不做什么
+- 它是 `local-first` 还是 `network-required`
+- 是否需要和相邻工具形成跳转或协同
 
-## Step 3: Implement Core Logic
+有歧义时，优先做一个小而完整的 v1，不要一开始摊太大。
 
-Default location: `src/lib/`
+## 第 3 步：实现核心逻辑
 
-Rules:
+默认位置：`src/lib/`
 
-- put parsing, formatting, diffing, conversion, and calculation logic in `src/lib/`
-- keep page components thin
-- prefer pure functions
-- add focused tests for the new core logic when it meaningfully reduces regression risk
+规则：
 
-Typical file pattern:
+- 解析、格式化、转换、计算、归一化等逻辑尽量放进 `src/lib/`
+- 页面保持薄，避免把大段业务逻辑堆进组件
+- 优先写纯函数
+- 当测试能明显降低回归风险时，补聚焦测试
+
+典型文件形态：
 
 - `src/lib/<tool-name>.ts`
 - `src/lib/<tool-name>.spec.ts`
 
-## Step 4: Implement Tool Page
+## 第 4 步：实现模块页面
 
-Default location: `src/views/tools/`
+默认位置：`src/modules/<group>/<tool>/`
 
-Rules:
+通常至少会包含：
 
-- reuse existing project UI patterns such as:
-  - `ToolPageLayout`
+- `meta.ts`
+- `module.ts`
+- `page.vue`
+- `index.ts`
+- 必要时补 `module.spec.ts`
+
+规则：
+
+- 优先复用现有 UI / runtime 模式，例如：
+  - `ToolScaffold`
+  - `ToolPaneShell`
   - `ToolPanel`
   - `ToolActionBar`
-  - `ResultCard`
-- keep defaults practical and product-oriented
-- use templates and sample inputs that reflect real usage
-- prefer user-facing labels and value-oriented wording over internal engineering terms
+  - `ToolHistoryPanel`
+  - `ToolSamplePanel`
+- 能接入 runtime 的能力尽量接入：
+  - `draft`
+  - `history`
+  - `sample-data`
+  - `share-url`
+  - `download-output`
+- 默认值、样例、模板要体现真实使用场景
+- 文案优先用户价值，不要过度暴露内部实现细节
 
-Typical file pattern:
+## 第 5 步：注册工具
 
-- `src/views/tools/<ToolName>View.vue`
+工具实现后，必须接入注册表。
 
-## Step 5: Register The Tool
+必查项：
 
-After the tool exists, wire it into the registry.
+- 在 `src/platform/tool-registry/definitions.ts` 中接入模块
+- 确认 `meta.ts` 中的 `category`、`group`、`order`、`keywords`、`tags`、`capabilities` 合理
+- 必要时更新：
+  - `src/platform/tool-registry/builder.spec.ts`
+  - `src/platform/tool-registry/search.spec.ts`
+  - `src/tools/registry/index.spec.ts`
 
-Required checks:
+工具只有在应用中可发现、可路由、可搜索后，才算真正完成。
 
-- add definition in `src/tools/registry/definitions.ts`
-- choose the right category in `src/tools/registry/categories.ts`
-- add search keywords or alias support in `src/tools/registry/search.ts` when needed
-- update related registry tests if search ordering or counts are affected
+## 第 6 步：同步文档
 
-The tool is not considered complete until it is discoverable in the app.
-
-## Step 6: Sync Docs
-
-Before finishing, always inspect whether these files need updates:
+完成前，至少检查以下内容是否需要同步：
 
 - `README.md`
 - `docs/roadmap.md`
-- the spec file created for this tool
+- 本次工具对应的 spec
 
-### README Rules
+### README 规则
 
-Update `README.md` when:
+以下情况必须检查 `README.md`：
 
-- tool count changes
-- tool list changes
-- capabilities change
-- commands or project structure descriptions become stale
+- 工具数量变化
+- 工具列表变化
+- 能力说明变化
+- 命令、目录结构、运行方式描述已经过时
 
-### Roadmap Rules
+### Roadmap 规则
 
-Update `docs/roadmap.md` when:
+以下情况必须检查 `docs/roadmap.md`：
 
-- a planned tool has now been implemented
-- completed tool lists are out of date
-- next-batch suggestions should be adjusted
+- 一个 planned 工具已经实现
+- 已完成工具列表不再准确
+- 下一批建议项需要调整
 
-## Step 7: Validate
+## 第 7 步：验证
 
-Use minimum sufficient validation.
+遵循“最小充分验证”。
 
-Preferred checks:
+优先检查：
 
-- diagnostics for edited files
-- targeted tests for new logic
-- `pnpm typecheck` when page and lib changes are involved
+- 已编辑文件的 diagnostics
+- 新逻辑的定向测试
+- 涉及页面和 lib 时运行 `pnpm typecheck`
 
-Avoid by default:
+默认避免：
 
 - `pnpm dev`
 - `pnpm build`
-- broad, expensive checks that do not materially increase confidence
+- 对当前改动没有明显增益的大而全高成本校验
 
-## Step 8: Commit Checklist
+## 第 8 步：提交前检查
 
-Before commit, confirm:
+提交前至少确认：
 
-- spec exists
-- core logic and UI are separated appropriately
-- registry wiring is complete
-- `README.md` has been checked
-- `docs/roadmap.md` has been checked
-- validation is sufficient
-- unrelated changes are not mixed in
+- spec 已存在
+- 核心逻辑与 UI 职责分离
+- registry 接入完成
+- `README.md` 已检查
+- `docs/roadmap.md` 已检查
+- 验证足够
+- 没有混入无关改动
 
-Commit message should reflect user-visible impact:
+提交信息要尽量反映用户可感知结果：
 
-- `feat` for new tools or user-visible new capabilities
-- `fix` for behavior or presentation corrections
-- `docs` for doc-only updates
+- 新工具或新能力：优先 `feat`
+- 行为修复或展示修复：优先 `fix`
+- 纯文档：`docs`
 
-## Preferred Behavior
+## 推荐执行顺序
 
-When running this workflow, prefer the following sequence in conversation:
+在对话中，优先按以下节奏推进：
 
-1. inspect existing adjacent tools
-2. inspect or create spec
-3. present a brief implementation plan
-4. implement logic
-5. implement UI
-6. wire registry and docs
-7. validate
-8. if asked, commit and push
+1. 查看相邻工具和现有实现
+2. 检查或创建 spec
+3. 给出简短实现计划
+4. 实现 `src/lib/` 逻辑
+5. 实现 `src/modules/` 页面与模块
+6. 接入 registry 与文档
+7. 做定向验证
+8. 如用户要求，再提交和推送
 
-## Examples
+## 示例
 
-### Example 1
+### 示例 1
 
-User asks: "新增一个 Password Generator"
+用户说：“新增一个 Password Generator”
 
-Expected flow:
+预期流程：
 
-1. create or update spec in `docs/specs/`
-2. implement password generation logic in `src/lib/`
-3. create `PasswordGeneratorView.vue`
-4. register tool
-5. update `README.md` and `docs/roadmap.md`
-6. run targeted validation
+1. 在 `docs/specs/` 中创建或补齐 spec
+2. 在 `src/lib/` 中实现密码生成逻辑
+3. 在 `src/modules/<group>/password-generator/` 中实现模块
+4. 接入 `src/platform/tool-registry/definitions.ts`
+5. 更新 `README.md` 和 `docs/roadmap.md`
+6. 做定向验证
 
-### Example 2
+### 示例 2
 
-User asks: "把 roadmap 里的 3 个工具做掉"
+用户说：“把 roadmap 里的 3 个工具做掉”
 
-Expected flow:
+预期流程：
 
-1. inspect roadmap entries
-2. create missing specs first
-3. implement one coherent batch
-4. sync registry and docs
-5. validate and hand off
+1. 先检查 roadmap 条目
+2. 优先补齐缺失 spec
+3. 分批或成组实现，保持每批范围闭合
+4. 同步 registry 和文档
+5. 验证并交付

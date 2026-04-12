@@ -1,6 +1,5 @@
 import { computed, ref, watch } from 'vue'
 import { defineStore } from 'pinia'
-import { toolModules } from '@/data/tool-modules'
 import { defaultFavoriteToolIds, readFavoriteToolIds, writeFavoriteToolIds } from '@/lib/favorites'
 import {
   readRecentToolEntries,
@@ -9,6 +8,7 @@ import {
   writeRecentToolEntries,
 } from '@/lib/recent-tools'
 import { readStorage, writeStorage } from '@/lib/storage'
+import { toolModules } from '@/platform/tool-registry'
 
 export type ThemeMode = 'dark' | 'mac-light'
 

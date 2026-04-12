@@ -1,0 +1,12 @@
+export type ToolCapability =
+  | 'favorite'
+  | 'recent'
+  | 'history'
+  | 'draft'
+  | 'copy-output'
+  | 'download-output'
+  | 'import-file'
+  | 'share-url'
+  | 'sample-data'
+  | 'network-access'
+  | 'sensitive-input'

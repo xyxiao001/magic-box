@@ -1,8 +1,8 @@
-import type { ToolModule } from '@/data/tool-modules'
-import { searchToolDefinitions } from '@/tools/registry'
+import type { ToolDefinition } from '@/platform/tool-registry'
+import { searchToolDefinitions } from '@/platform/tool-registry'
 import type { RecentToolEntry } from '@/lib/recent-tools'
 
-export function getToolCount(modules: ToolModule[]) {
+export function getToolCount(modules: ToolDefinition[]) {
   return modules.length
 }
 
@@ -14,7 +14,7 @@ function buildSearchContext(favoriteModuleIds: string[], recentTools: RecentTool
 }
 
 export function orderModulesByPreference(
-  modules: ToolModule[],
+  modules: ToolDefinition[],
   favoriteModuleIds: string[],
   searchQuery: string,
   recentTools: RecentToolEntry[] = []
@@ -22,7 +22,7 @@ export function orderModulesByPreference(
   return searchToolDefinitions(modules, searchQuery, buildSearchContext(favoriteModuleIds, recentTools))
 }
 
-export function orderModulesByFavorite(modules: ToolModule[], favoriteModuleIds: string[]) {
+export function orderModulesByFavorite(modules: ToolDefinition[], favoriteModuleIds: string[]) {
   const favoriteIds = new Set(favoriteModuleIds)
 
   return [...modules].sort((left, right) => {
@@ -41,6 +41,6 @@ export function orderModulesByFavorite(modules: ToolModule[], favoriteModuleIds:
   })
 }
 
-export function filterModulesBySearch(modules: ToolModule[], searchQuery: string) {
+export function filterModulesBySearch(modules: ToolDefinition[], searchQuery: string) {
   return searchToolDefinitions(modules, searchQuery)
 }

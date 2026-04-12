@@ -2,6 +2,7 @@ import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import ErrorBanner from '@/components/toolkit/ErrorBanner.vue'
 import ResultCard from '@/components/toolkit/ResultCard.vue'
+import { useMessage } from '@/shared/composables/useMessage'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
 import ToolTagList from '@/components/toolkit/ToolTagList.vue'
 
@@ -15,6 +16,10 @@ vi.mock('@/lib/clipboard', () => ({
 
 describe('toolkit components', () => {
   afterEach(() => {
+    const { messages, removeMessage } = useMessage()
+    for (const message of messages.value) {
+      removeMessage(message.id)
+    }
     vi.clearAllMocks()
     vi.useRealTimers()
   })
@@ -32,7 +37,7 @@ describe('toolkit components', () => {
   })
 
   it('copies result card content', async () => {
-    vi.useFakeTimers()
+    const { messages } = useMessage()
     const wrapper = mount(ResultCard, {
       props: {
         title: '结果',
@@ -47,7 +52,7 @@ describe('toolkit components', () => {
     await wrapper.get('button').trigger('click')
 
     expect(copyToClipboardMock).toHaveBeenCalledWith('hello')
-    expect(wrapper.text()).toContain('复制结果成功')
+    expect(messages.value.at(-1)?.text).toBe('结果已复制')
   })
 
   it('renders error banner message', () => {
