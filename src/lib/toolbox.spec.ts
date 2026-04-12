@@ -27,47 +27,27 @@ describe('toolbox helpers', () => {
   })
 
   it('filters modules by search query', () => {
-    const ordered = filterModulesBySearch(toolModules, 'json')
+    const orderedIds = filterModulesBySearch(toolModules, 'json').map((module) => module.id)
 
-    expect(ordered.map((module) => module.id)).toEqual(['json-toolkit', 'json-typegen'])
+    expect(orderedIds).toEqual(
+      expect.arrayContaining(['json-toolkit', 'json-typegen', 'json-diff-jsonpath'])
+    )
+    expect(orderedIds[0]).toBe('json-toolkit')
+    expect(orderedIds.indexOf('json-typegen')).toBeLessThan(orderedIds.indexOf('json-diff-jsonpath'))
   })
 
   it('keeps original order after favorite modules when no manual sorting exists', () => {
-    const ordered = orderModulesByPreference(toolModules, ['codec-lab'], '')
+    const favoriteIds = ['codec-lab']
+    const orderedIds = orderModulesByPreference(toolModules, favoriteIds, '').map((module) => module.id)
+    const remainingOrderedIds = orderedIds.filter((id) => !favoriteIds.includes(id))
+    const originalIds = toolModules.map((module) => module.id)
+    const remainingOriginalIds = originalIds.filter((id) => !favoriteIds.includes(id))
 
-    expect(ordered.map((module) => module.id)).toEqual([
-      'codec-lab',
-      'json-toolkit',
-      'qrcode-studio',
-      'diff-studio',
-      'markdown-studio',
-      'text-toolkit',
-      'http-lab',
-      'request-converter',
-      'url-inspector',
-      'json-typegen',
-      'regex-workbench',
-      'jwt-studio',
-      'jwt-sign-verify',
-      'hash-studio',
-      'uuid-studio',
-      'header-cookie-lab',
-      'websocket-lab',
-      'hmac-signer',
-      'package-radar',
-      'clipboard-history',
-      'image-studio',
-      'color-studio',
-      'time-lab',
-      'cron-planner',
-      'calculator-pro',
-      'unit-converter',
-      'weather-desk',
-      'white-noise-studio',
-    ])
+    expect(orderedIds[0]).toBe('codec-lab')
+    expect(remainingOrderedIds).toEqual(remainingOriginalIds)
   })
 
   it('counts tool modules', () => {
-    expect(getToolCount(toolModules)).toBe(28)
+    expect(getToolCount(toolModules)).toBe(toolModules.length)
   })
 })

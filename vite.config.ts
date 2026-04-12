@@ -8,16 +8,19 @@ export default defineConfig({
     vue(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'icons.svg'],
+      includeAssets: ['favicon.svg', 'apple-touch-icon.png', 'icons.svg', 'safari-pinned-tab.svg'],
       manifest: {
+        id: '/',
         name: 'Magic Box',
         short_name: 'Magic Box',
         description: 'Local-first toolbox with developer and everyday utilities.',
         theme_color: '#0f1d30',
         background_color: '#07111d',
         display: 'standalone',
+        display_override: ['window-controls-overlay', 'standalone'],
         orientation: 'portrait',
         start_url: '/',
+        scope: '/',
         icons: [
           {
             src: '/pwa-192.png',

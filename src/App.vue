@@ -17,9 +17,12 @@ const router = useRouter()
 const workbenchStore = useWorkbenchStore()
 
 const searchOpen = ref(false)
+const mobileMenuOpen = ref(false)
+const isCompactLayout = ref(false)
 const searchInput = ref<HTMLInputElement | null>(null)
 const deferredInstallPrompt = ref<BeforeInstallPromptEvent | null>(null)
 const showInstallButton = ref(false)
+let compactLayoutMediaQuery: MediaQueryList | null = null
 
 const {
   needRefresh: pwaNeedRefresh,
@@ -70,9 +73,16 @@ const pageTitle = computed(() => {
   return 'Magic Box'
 })
 
+const mobileMenuLabel = computed(() => (mobileMenuOpen.value ? '收起菜单' : '打开菜单'))
+
 function applyTheme(mode: 'dark' | 'mac-light') {
   document.documentElement.dataset.theme = mode
   document.documentElement.style.colorScheme = mode === 'mac-light' ? 'light' : 'dark'
+
+  const themeColorMeta = document.querySelector('meta[name="theme-color"]')
+  if (themeColorMeta) {
+    themeColorMeta.setAttribute('content', mode === 'mac-light' ? '#f4f7fc' : '#07111d')
+  }
 }
 
 function applyPageTitle(title: string) {
@@ -80,6 +90,7 @@ function applyPageTitle(title: string) {
 }
 
 function openSearchPanel() {
+  mobileMenuOpen.value = false
   searchOpen.value = true
 
   nextTick(() => {
@@ -95,8 +106,29 @@ function closeSearchPanel(clearQuery = false) {
   }
 }
 
+function syncCompactLayout(matches: boolean) {
+  isCompactLayout.value = matches
+
+  if (!matches) {
+    mobileMenuOpen.value = false
+  }
+}
+
+function handleCompactLayoutChange(event: MediaQueryListEvent) {
+  syncCompactLayout(event.matches)
+}
+
+function toggleMobileMenu() {
+  mobileMenuOpen.value = !mobileMenuOpen.value
+}
+
+function closeMobileMenu() {
+  mobileMenuOpen.value = false
+}
+
 async function goToModule(path: string) {
   await router.push(path)
+  closeMobileMenu()
   closeSearchPanel(true)
 }
 
@@ -167,6 +199,9 @@ watch(
   () => route.fullPath,
   () => {
     searchOpen.value = false
+    if (isCompactLayout.value) {
+      mobileMenuOpen.value = false
+    }
 
     if (currentModule.value) {
       workbenchStore.markToolUsed(currentModule.value.id)
@@ -185,33 +220,74 @@ watch(pageTitle, (title) => {
   applyPageTitle(title)
 })
 
+watch(
+  [isCompactLayout, mobileMenuOpen, searchOpen],
+  ([compact, menuOpen, searchPanelOpen]) => {
+    document.body.style.overflow = compact && (menuOpen || searchPanelOpen) ? 'hidden' : ''
+  },
+  { immediate: true }
+)
+
 onMounted(() => {
   applyTheme(workbenchStore.themeMode)
   applyPageTitle(pageTitle.value)
+  compactLayoutMediaQuery = window.matchMedia('(max-width: 1180px)')
+  syncCompactLayout(compactLayoutMediaQuery.matches)
   if (currentModule.value) {
     workbenchStore.markToolUsed(currentModule.value.id)
   }
   window.addEventListener('keydown', handleGlobalKeydown)
   window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
   window.addEventListener('appinstalled', handleAppInstalled)
+  compactLayoutMediaQuery.addEventListener('change', handleCompactLayoutChange)
 })
 
 onBeforeUnmount(() => {
+  document.body.style.overflow = ''
   window.removeEventListener('keydown', handleGlobalKeydown)
   window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
   window.removeEventListener('appinstalled', handleAppInstalled)
+  compactLayoutMediaQuery?.removeEventListener('change', handleCompactLayoutChange)
 })
 </script>
 
 <template>
   <div class="app-shell">
-    <aside class="sidebar">
+    <div
+      v-if="isCompactLayout && mobileMenuOpen"
+      class="sidebar-backdrop"
+      @click="closeMobileMenu"
+    ></div>
+
+    <aside
+      id="mobile-sidebar"
+      class="sidebar"
+      :class="{ 'sidebar-open': mobileMenuOpen, 'sidebar-compact': isCompactLayout }"
+    >
       <div class="brand-block">
         <p class="eyebrow">Developer Toolbox</p>
         <h1>Magic Box</h1>
       </div>
 
       <div class="sidebar-toolbar">
+        <button
+          v-if="isCompactLayout"
+          type="button"
+          class="icon-button sidebar-close-button"
+          aria-label="收起菜单"
+          title="收起菜单"
+          @click="closeMobileMenu"
+        >
+          <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="toolbar-icon">
+            <path
+              d="M5 5L15 15M15 5L5 15"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+            />
+          </svg>
+        </button>
+
         <button
           type="button"
           class="icon-button"
@@ -309,6 +385,25 @@ onBeforeUnmount(() => {
     <div class="workspace-shell">
       <header class="workspace-header">
         <div class="workspace-header-main">
+          <button
+            v-if="isCompactLayout"
+            type="button"
+            class="icon-button workspace-menu-button"
+            :aria-label="mobileMenuLabel"
+            :aria-expanded="mobileMenuOpen"
+            aria-controls="mobile-sidebar"
+            @click="toggleMobileMenu"
+          >
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true" class="toolbar-icon">
+              <path
+                d="M4 6H16M4 10H16M4 14H12"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+              />
+            </svg>
+          </button>
+
           <div class="traffic-lights" aria-hidden="true">
             <span class="traffic-light traffic-light-close"></span>
             <span class="traffic-light traffic-light-minimize"></span>
@@ -355,7 +450,7 @@ onBeforeUnmount(() => {
         </div>
       </header>
 
-      <main class="content-panel">
+      <main>
         <RouterView />
       </main>
 
@@ -386,6 +481,16 @@ onBeforeUnmount(() => {
         </article>
       </section>
     </div>
+
+    <button
+      v-if="isCompactLayout && !mobileMenuOpen"
+      type="button"
+      class="mobile-fab"
+      :aria-label="mobileMenuLabel"
+      @click="toggleMobileMenu"
+    >
+      菜单
+    </button>
 
     <div v-if="searchOpen" class="palette-backdrop" @click="closeSearchPanel(true)">
       <section class="palette-panel" @click.stop>

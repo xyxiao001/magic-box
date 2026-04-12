@@ -1,4 +1,8 @@
 :root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
   --bg: #07111d;
   --bg-soft: #0b1728;
   --panel: rgba(10, 20, 35, 0.82);
@@ -67,6 +71,7 @@ body,
 
 body {
   margin: 0;
+  overscroll-behavior-y: none;
 }
 
 body::before {
@@ -106,9 +111,20 @@ button {
 .app-shell {
   display: grid;
   grid-template-columns: 270px minmax(0, 1fr);
+  min-height: 100vh;
+  min-height: 100dvh;
   height: 100vh;
+  height: 100dvh;
   position: relative;
   overflow: hidden;
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 12, 0.56);
+  backdrop-filter: blur(10px);
+  z-index: 11;
 }
 
 .sidebar {
@@ -124,6 +140,7 @@ button {
   position: relative;
   overflow: hidden;
   min-height: 0;
+  z-index: 12;
 }
 
 .brand-block {
@@ -215,6 +232,10 @@ button {
   align-items: center;
   gap: 8px;
   padding: 0 4px;
+}
+
+.sidebar-close-button {
+  display: none;
 }
 
 .icon-button {
@@ -497,7 +518,10 @@ button {
   grid-template-rows: auto minmax(0, 1fr);
   min-width: 0;
   min-height: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
   height: 100vh;
+  height: 100dvh;
   position: relative;
 }
 
@@ -506,13 +530,15 @@ button {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 12px 20px;
+  padding: calc(12px + var(--safe-top)) calc(20px + var(--safe-right)) 12px calc(20px + var(--safe-left));
   border-bottom: 1px solid var(--border);
-  background: rgba(5, 12, 22, 0.42);
-  backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 5;
+}
+
+.workspace-menu-button {
+  display: none;
 }
 
 .workspace-header .eyebrow {
@@ -595,11 +621,11 @@ button {
   background: #28c840;
 }
 
-.content-panel {
+.workspace-shell > main {
   min-width: 0;
-  padding: 16px 20px 20px;
   overflow: auto;
   min-height: 0;
+  -webkit-overflow-scrolling: touch;
 }
 
 .tool-page {
@@ -630,9 +656,15 @@ button {
 .tool-page-json {
   --tool-accent: #8fc2ff;
   --tool-accent-soft: rgba(143, 194, 255, 0.18);
-  height: calc(100vh - 170px);
-  min-height: calc(100vh - 170px);
+  padding: 16px;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  height: calc(100vh - 100px);
+  min-height: calc(100vh - 100px);
   overflow: hidden;
+  backdrop-filter: none;
 }
 
 .tool-page-codec {
@@ -2673,8 +2705,8 @@ button {
 
 .pwa-toast-stack {
   position: fixed;
-  right: 28px;
-  bottom: 28px;
+  right: calc(28px + var(--safe-right));
+  bottom: calc(28px + var(--safe-bottom));
   display: grid;
   gap: 12px;
   z-index: 18;
@@ -2708,10 +2740,30 @@ button {
   inset: 0;
   display: grid;
   place-items: start center;
-  padding: 10vh 16px 16px;
+  padding: max(10vh, calc(var(--safe-top) + 24px)) calc(16px + var(--safe-right)) calc(16px + var(--safe-bottom))
+    calc(16px + var(--safe-left));
   background: rgba(2, 6, 12, 0.62);
   backdrop-filter: blur(8px);
   z-index: 20;
+}
+
+.mobile-fab {
+  position: fixed;
+  right: calc(18px + var(--safe-right));
+  bottom: calc(18px + var(--safe-bottom));
+  z-index: 14;
+  min-height: 48px;
+  padding: 0 16px;
+  border: 1px solid rgba(140, 190, 255, 0.18);
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12), transparent 30%),
+    rgba(10, 20, 35, 0.9);
+  color: var(--text);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 18px 42px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(16px) saturate(140%);
 }
 
 .palette-panel {
@@ -2911,13 +2963,6 @@ html[data-theme='mac-light'] .solid-button {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.58),
     0 12px 24px color-mix(in srgb, var(--tool-accent, var(--accent)) 12%, transparent);
-}
-
-html[data-theme='mac-light'] .workspace-header {
-  background: rgba(255, 255, 255, 0.48);
-  box-shadow:
-    inset 0 -1px 0 rgba(255, 255, 255, 0.58),
-    0 8px 18px rgba(169, 186, 213, 0.1);
 }
 
 html[data-theme='mac-light'] .tool-page {
@@ -3259,6 +3304,15 @@ html[data-theme='mac-light'] .pwa-toast-card {
     0 18px 42px rgba(141, 160, 193, 0.16);
 }
 
+html[data-theme='mac-light'] .mobile-fab {
+  border-color: rgba(104, 127, 165, 0.16);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 251, 255, 0.98));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.84),
+    0 18px 42px rgba(141, 160, 193, 0.18);
+}
+
 html[data-theme='mac-light'] .palette-backdrop {
   background: rgba(225, 233, 245, 0.52);
 }
@@ -3301,6 +3355,21 @@ html[data-theme='mac-light'] .traffic-lights {
     height: auto;
   }
 
+  .json-tool-pane {
+    overflow: visible;
+  }
+
+  .json-tool-pane .text-area-full {
+    height: auto;
+    min-height: 320px;
+  }
+
+  .json-tool-pane .json-tree-panel,
+  .json-tool-pane .empty-panel {
+    height: auto;
+    min-height: 320px;
+  }
+
   .app-shell {
     grid-template-columns: 1fr;
     height: auto;
@@ -3308,9 +3377,32 @@ html[data-theme='mac-light'] .traffic-lights {
   }
 
   .sidebar {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    overflow: visible;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: min(360px, calc(100vw - 24px));
+    max-width: 100%;
+    padding:
+      calc(16px + var(--safe-top))
+      16px
+      calc(16px + var(--safe-bottom))
+      calc(16px + var(--safe-left));
+    border-right: 1px solid var(--border);
+    border-bottom: none;
+    overflow: auto;
+    transform: translateX(calc(-100% - 24px));
+    transition: transform 220ms ease, box-shadow 220ms ease;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+  }
+
+  .sidebar-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-close-button,
+  .workspace-menu-button {
+    display: inline-flex;
   }
 
   .tool-page-layout,
@@ -3325,10 +3417,9 @@ html[data-theme='mac-light'] .traffic-lights {
 }
 
 @media (max-width: 760px) {
-  .workspace-header,
-  .content-panel,
-  .sidebar {
-    padding-inline: 18px;
+  .workspace-header {
+    padding-left: calc(18px + var(--safe-left));
+    padding-right: calc(18px + var(--safe-right));
   }
 
   .tool-page-header {
@@ -3341,7 +3432,8 @@ html[data-theme='mac-light'] .traffic-lights {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding-block: 10px;
+    padding-top: calc(10px + var(--safe-top));
+    padding-bottom: 10px;
   }
 
   .workspace-header-main {
@@ -3371,6 +3463,31 @@ html[data-theme='mac-light'] .traffic-lights {
     font-size: 1.12rem;
   }
 
+  .workspace-favorite-button,
+  .workspace-install-button {
+    width: 34px;
+    min-width: 34px;
+    padding-inline: 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .workspace-install-button::after {
+    content: '+';
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .workspace-menu-button {
+    width: 36px;
+    height: 36px;
+  }
+
   .search-launch {
     min-height: 40px;
     padding: 8px 12px;
@@ -3390,10 +3507,24 @@ html[data-theme='mac-light'] .traffic-lights {
     border-radius: 22px;
   }
 
+  .tool-page-json {
+    padding: 12px;
+    border-radius: 0;
+  }
+
+  .json-tool-pane .text-area-full {
+    min-height: 320px;
+  }
+
+  .json-tool-pane .json-tree-panel,
+  .json-tool-pane .empty-panel {
+    min-height: 320px;
+  }
+
   .pwa-toast-stack {
     right: 18px;
     left: 18px;
-    bottom: 18px;
+    bottom: calc(18px + var(--safe-bottom));
   }
 
   .pwa-toast-card {
@@ -3403,15 +3534,34 @@ html[data-theme='mac-light'] .traffic-lights {
 
   .sidebar-toolbar {
     gap: 6px;
+    flex-wrap: wrap;
   }
 
   .sidebar {
     gap: 12px;
-    padding-block: 14px;
+    padding:
+      calc(14px + var(--safe-top))
+      18px
+      calc(18px + var(--safe-bottom))
+      calc(18px + var(--safe-left));
   }
 
   .brand-block h1 {
     font-size: 1.85rem;
+  }
+
+  .search-launch-inline {
+    min-width: 0;
+    padding-inline: 10px;
+  }
+
+  .search-launch-inline .shortcut-key {
+    display: none;
+  }
+
+  .theme-switcher {
+    order: 2;
+    width: 100%;
   }
 
   .nav-link-kicker,
@@ -3481,5 +3631,11 @@ html[data-theme='mac-light'] .traffic-lights {
 
   .traffic-lights {
     padding-top: 0;
+  }
+
+  .mobile-fab {
+    right: calc(16px + var(--safe-right));
+    bottom: calc(16px + var(--safe-bottom));
+    min-height: 46px;
   }
 }
