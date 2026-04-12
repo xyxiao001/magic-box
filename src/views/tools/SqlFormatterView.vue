@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import ResultCard from '@/components/toolkit/ResultCard.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { buildSqlStats, formatSql, type SqlFormatterOptions, type SqlKeywordCase } from '@/lib/sql-formatter'
@@ -114,7 +115,7 @@ function updateKeywordCase(keywordCase: SqlKeywordCase) {
 <template>
   <ToolPageLayout wide class="sql-formatter-page">
     <template #editor>
-      <ToolPanel title="SQL 输入" subtitle="把凌乱 SQL 粘进来，快速得到更易读的格式化结果或单行压缩版本。">
+      <ToolPaneShell title="SQL 输入" subtitle="把凌乱 SQL 粘进来，快速得到更易读的格式化结果或单行压缩版本。">
         <ToolActionBar>
           <button type="button" class="solid-button" :disabled="!formattedResult.ok || !formattedResult.value" @click="copyOutput">
             复制结果
@@ -172,11 +173,11 @@ function updateKeywordCase(keywordCase: SqlKeywordCase) {
           <span class="field-label">原始 SQL</span>
           <textarea v-model="sqlInput" class="text-area text-area-full" spellcheck="false" placeholder="SELECT * FROM users WHERE id = 1" />
         </label>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="格式化结果" subtitle="首版聚焦通用 SQL 的可读性优化，不做数据库执行和真实语法校验。">
+      <ToolPaneShell title="格式化结果" subtitle="首版聚焦通用 SQL 的可读性优化，不做数据库执行和真实语法校验。">
         <div class="sql-summary-grid">
           <ResultCard title="输入统计" tone="neutral">
             <div class="data-list">
@@ -223,7 +224,7 @@ function updateKeywordCase(keywordCase: SqlKeywordCase) {
             :placeholder="formattedResult.error || '格式化结果会显示在这里'"
           />
         </ResultCard>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 

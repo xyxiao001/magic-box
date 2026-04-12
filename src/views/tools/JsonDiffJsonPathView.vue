@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import ResultCard from '@/components/toolkit/ResultCard.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { buildLineDiff } from '@/lib/diff'
@@ -217,7 +218,7 @@ function clearAll() {
 <template>
   <ToolPageLayout wide class="json-diff-page">
     <template #editor>
-      <ToolPanel title="JSON 输入" subtitle="把接口响应或配置对象放到左右两侧，直接做结构差异和路径提取。">
+      <ToolPaneShell title="JSON 输入" subtitle="把接口响应或配置对象放到左右两侧，直接做结构差异和路径提取。">
         <ToolActionBar>
           <button type="button" class="solid-button" @click="formatOneSide('left')">格式化左侧</button>
           <button type="button" class="ghost-button" @click="formatOneSide('right')">格式化右侧</button>
@@ -260,11 +261,11 @@ function clearAll() {
             </span>
           </label>
         </div>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="结果" subtitle="先看结构差异，再按需切换文本对比和 JSONPath 查询。">
+      <ToolPaneShell title="结果" subtitle="先看结构差异，再按需切换文本对比和 JSONPath 查询。">
         <div class="json-diff-summary-grid">
           <ResultCard
             title="结构差异"
@@ -418,7 +419,7 @@ function clearAll() {
             <p>{{ jsonPathResult.error || '当前表达式没有匹配结果' }}</p>
           </div>
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 

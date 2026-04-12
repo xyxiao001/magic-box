@@ -2,6 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { buildUnsignedJwt, parseJwt } from '@/lib/jwt'
@@ -129,7 +130,7 @@ watch(tokenInput, (value) => {
 <template>
   <ToolPageLayout>
     <template #editor>
-      <ToolPanel title="Token 输入" subtitle="只在本地解析 header / payload，不上传到外部服务。" :badge="statusLabel">
+      <ToolPaneShell title="Token 输入" subtitle="只在本地解析 header / payload，不上传到外部服务。" :badge="statusLabel">
         <ToolActionBar>
           <button
             v-for="template in jwtTemplates"
@@ -174,11 +175,11 @@ watch(tokenInput, (value) => {
             placeholder="粘贴完整的 header.payload.signature"
           />
         </label>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="解析结果" :subtitle="parsed.error || parsed.summary">
+      <ToolPaneShell title="解析结果" :subtitle="parsed.error || parsed.summary">
         <template #actions>
           <span
             class="helper-text"
@@ -245,7 +246,7 @@ watch(tokenInput, (value) => {
 
           <textarea :value="parsed.payloadText" class="text-area jwt-output" readonly placeholder="Payload JSON 会显示在这里" />
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 

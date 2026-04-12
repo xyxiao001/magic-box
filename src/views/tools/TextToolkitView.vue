@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import ResultCard from '@/components/toolkit/ResultCard.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -138,7 +139,7 @@ function updateCaseMode(mode: TextCaseMode) {
 <template>
   <ToolPageLayout wide class="text-toolkit-page">
     <template #editor>
-      <ToolPanel title="输入区" subtitle="把常见文本整理动作收敛到一个面板里，适合快速处理碎片化文本。">
+      <ToolPaneShell title="输入区" subtitle="把常见文本整理动作收敛到一个面板里，适合快速处理碎片化文本。">
         <label class="field-row">
           <span class="field-label">原始文本</span>
           <textarea
@@ -249,11 +250,11 @@ function updateCaseMode(mode: TextCaseMode) {
             </button>
           </div>
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="输出区" subtitle="结果实时计算，适合清洗列表、整理文案、批量补前后缀。">
+      <ToolPaneShell title="输出区" subtitle="结果实时计算，适合清洗列表、整理文案、批量补前后缀。">
         <div class="text-stats-grid">
           <ResultCard title="输入统计" tone="neutral">
             <div class="data-list">
@@ -319,7 +320,7 @@ function updateCaseMode(mode: TextCaseMode) {
             placeholder="处理结果会显示在这里"
           />
         </ResultCard>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 

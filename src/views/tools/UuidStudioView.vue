@@ -4,6 +4,7 @@ import ErrorBanner from '@/components/toolkit/ErrorBanner.vue'
 import ResultCard from '@/components/toolkit/ResultCard.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -121,7 +122,7 @@ generateIds()
 <template>
   <ToolPageLayout wide>
     <template #editor>
-      <ToolPanel title="生成配置" subtitle="支持 UUID v4 与 NanoID，适合批量生成测试数据、主键和临时标识。">
+      <ToolPaneShell title="生成配置" subtitle="支持 UUID v4 与 NanoID，适合批量生成测试数据、主键和临时标识。">
         <div class="tab-row">
           <button type="button" class="tab-button" :data-active="mode === 'uuid'" @click="mode = 'uuid'">
             UUID v4
@@ -190,11 +191,11 @@ generateIds()
           </label>
           <p class="helper-text">{{ validationSummary }}</p>
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="生成结果" subtitle="支持批量复制和逐条复制，可直接作为接口调试和测试数据输入。">
+      <ToolPaneShell title="生成结果" subtitle="支持批量复制和逐条复制，可直接作为接口调试和测试数据输入。">
         <ResultCard
           title="结果摘要"
           :subtitle="`${mode === 'uuid' ? 'UUID v4' : 'NanoID'} · 共 ${results.length} 条`"
@@ -236,7 +237,7 @@ generateIds()
             <code class="package-command-code uuid-code">{{ item }}</code>
           </ResultCard>
         </div>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 

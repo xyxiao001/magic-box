@@ -4,6 +4,7 @@ import ErrorBanner from '@/components/toolkit/ErrorBanner.vue'
 import ResultCard from '@/components/toolkit/ResultCard.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -150,7 +151,7 @@ function clearAll() {
 <template>
   <ToolPageLayout wide class="url-inspector-page">
     <template #editor>
-      <ToolPanel
+      <ToolPaneShell
         title="URL 输入"
         subtitle="粘贴完整链接后自动拆解 protocol、host、path、query、hash。"
         :badge="parsed.ok ? parsed.protocol.toUpperCase() : 'URL'"
@@ -200,11 +201,11 @@ function clearAll() {
             </button>
           </div>
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="解析结果" subtitle="先确认基础字段，再按需改 query 参数并重建 URL。">
+      <ToolPaneShell title="解析结果" subtitle="先确认基础字段，再按需改 query 参数并重建 URL。">
         <div v-if="parsed.ok" class="url-summary-grid">
           <ResultCard title="基础信息" :copy-value="parsed.origin" copy-label="复制 Origin">
             <div class="data-list">
@@ -295,7 +296,7 @@ function clearAll() {
             </router-link>
           </div>
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 

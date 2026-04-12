@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import ResultCard from '@/components/toolkit/ResultCard.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { compareTargetHash, hashFile, hashText, type HashResultRow } from '@/lib/hash-tool'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -110,7 +111,11 @@ void computeTextHashes()
 <template>
   <ToolPageLayout>
     <template #editor>
-      <ToolPanel title="输入源" subtitle="支持文本和单文件两种模式，全部在浏览器本地计算。" :badge="inputMode === 'text' ? '文本模式' : '文件模式'">
+      <ToolPaneShell
+        title="输入源"
+        subtitle="支持文本和单文件两种模式，全部在浏览器本地计算。"
+        :badge="inputMode === 'text' ? '文本模式' : '文件模式'"
+      >
         <ToolActionBar>
           <button
             type="button"
@@ -172,11 +177,11 @@ void computeTextHashes()
         >
           {{ isBusy ? '计算中...' : statusMessage }}
         </p>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="哈希结果" subtitle="先看算法和值，再用目标 hash 快速判断是否一致。">
+      <ToolPaneShell title="哈希结果" subtitle="先看算法和值，再用目标 hash 快速判断是否一致。">
         <ToolPanel title="比对状态" subtitle="大小写不敏感，直接对比完整值。">
           <div class="data-list">
             <article class="data-row">
@@ -228,7 +233,7 @@ void computeTextHashes()
             <p>输入文本或选择文件后，这里会显示结果。</p>
           </div>
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 

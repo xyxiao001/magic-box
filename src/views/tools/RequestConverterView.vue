@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import ErrorBanner from '@/components/toolkit/ErrorBanner.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { readStorage, writeStorage } from '@/lib/storage'
@@ -79,7 +80,7 @@ watch(activeTab, (value) => {
 <template>
   <ToolPageLayout wide>
     <template #editor>
-      <ToolPanel
+      <ToolPaneShell
         title="cURL 输入"
         subtitle="粘贴 cURL 后自动解析，并生成 fetch / axios / node fetch 片段。"
         :badge="parsed.ok ? parsed.method : '—'"
@@ -101,11 +102,11 @@ watch(activeTab, (value) => {
           :message="parsed.error || '请输入合法的 cURL 命令'"
           hint="请检查引号、Header 和 body 参数是否完整。"
         />
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="输出" subtitle="先看结构化视图确认 method、url、header、body，再复制代码片段。">
+      <ToolPaneShell title="输出" subtitle="先看结构化视图确认 method、url、header、body，再复制代码片段。">
         <ToolActionBar>
           <button
             type="button"
@@ -155,7 +156,7 @@ watch(activeTab, (value) => {
 
           <textarea :value="activeOutput" class="text-area text-area-full" readonly placeholder="解析成功后，这里会生成代码" />
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 

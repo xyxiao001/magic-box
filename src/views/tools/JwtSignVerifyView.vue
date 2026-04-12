@@ -4,6 +4,7 @@ import ErrorBanner from '@/components/toolkit/ErrorBanner.vue'
 import ResultCard from '@/components/toolkit/ResultCard.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import {
   parseJwt,
@@ -149,7 +150,7 @@ function applyTemplate() {
 <template>
   <ToolPageLayout wide>
     <template #editor>
-      <ToolPanel title="输入" subtitle="首版支持 HS256 的本地签发与验签，和 JWT Studio 共用解析结果。" badge="HS256">
+      <ToolPaneShell title="输入" subtitle="首版支持 HS256 的本地签发与验签，和 JWT Studio 共用解析结果。" badge="HS256">
         <div class="tab-row">
           <button type="button" class="tab-button" :data-active="mode === 'sign'" @click="mode = 'sign'">
             签发
@@ -219,11 +220,11 @@ function applyTemplate() {
             hint="请确认 token 完整，且使用的是同一个 HS256 secret。"
           />
         </template>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="结果" subtitle="生成后可直接复制 token，验签时会同步展示解析结果与签名对比。">
+      <ToolPaneShell title="结果" subtitle="生成后可直接复制 token，验签时会同步展示解析结果与签名对比。">
         <template v-if="mode === 'sign'">
           <ResultCard
             title="Signed JWT"
@@ -299,7 +300,7 @@ function applyTemplate() {
             </ResultCard>
           </div>
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 </template>

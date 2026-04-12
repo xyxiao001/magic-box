@@ -3,6 +3,7 @@ import { computed, ref, watch } from 'vue'
 import ResultCard from '@/components/toolkit/ResultCard.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
+import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import {
@@ -204,7 +205,7 @@ function updateDelimiter(delimiter: CsvDelimiter) {
 <template>
   <ToolPageLayout wide class="csv-toolkit-page">
     <template #editor>
-      <ToolPanel title="输入区" subtitle="支持 CSV / JSON 双向转换，适合快速预览、清洗和导出。">
+      <ToolPaneShell title="输入区" subtitle="支持 CSV / JSON 双向转换，适合快速预览、清洗和导出。">
         <ToolActionBar>
           <button type="button" class="tab-button" :data-active="inputMode === 'csv'" @click="inputMode = 'csv'">CSV</button>
           <button type="button" class="tab-button" :data-active="inputMode === 'json'" @click="inputMode = 'json'">JSON</button>
@@ -277,11 +278,11 @@ function updateDelimiter(delimiter: CsvDelimiter) {
             :placeholder="inputPlaceholder"
           />
         </label>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
 
     <template #viewer>
-      <ToolPanel title="输出区" subtitle="先看表格预览，再按需复制 JSON 或 CSV 结果。">
+      <ToolPaneShell title="输出区" subtitle="先看表格预览，再按需复制 JSON 或 CSV 结果。">
         <div class="csv-summary-grid">
           <ResultCard
             title="预览摘要"
@@ -377,7 +378,7 @@ function updateDelimiter(delimiter: CsvDelimiter) {
             :placeholder="csvOutput.error || 'CSV 输出会显示在这里'"
           />
         </ToolPanel>
-      </ToolPanel>
+      </ToolPaneShell>
     </template>
   </ToolPageLayout>
 
