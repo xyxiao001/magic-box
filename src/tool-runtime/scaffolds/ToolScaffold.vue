@@ -5,6 +5,9 @@ import ToolPageLayout from '@/components/toolkit/ToolPageLayout.vue'
 import ToolTagList from '@/components/toolkit/ToolTagList.vue'
 import type { ToolCapabilityTag } from '@/platform/tool-registry/types'
 import type { ToolModuleMeta } from '../protocols/tool-module'
+import ToolHistoryPanel from './ToolHistoryPanel.vue'
+import ToolSamplePanel from './ToolSamplePanel.vue'
+import type { ToolScaffoldHistoryPanel, ToolScaffoldSamplePanel } from './types'
 
 const props = withDefaults(
   defineProps<{
@@ -14,6 +17,8 @@ const props = withDefaults(
     wide?: boolean
     singleColumn?: boolean
     showHeader?: boolean
+    historyPanel?: ToolScaffoldHistoryPanel | null
+    samplePanel?: ToolScaffoldSamplePanel | null
   }>(),
   {
     loading: false,
@@ -21,6 +26,8 @@ const props = withDefaults(
     wide: false,
     singleColumn: false,
     showHeader: false,
+    historyPanel: null,
+    samplePanel: null,
   }
 )
 
@@ -45,6 +52,19 @@ const visibleTags = computed(() => (props.meta.tags ?? []).filter((tag): tag is 
         <section class="tool-scaffold-pane">
           <slot name="actions" />
           <slot name="input" />
+          <ToolSamplePanel
+            v-if="props.samplePanel?.samples.length"
+            :samples="props.samplePanel.samples"
+            @apply="props.samplePanel.onApply"
+          />
+          <ToolHistoryPanel
+            v-if="props.historyPanel"
+            :entries="props.historyPanel.entries"
+            :empty-text="props.historyPanel.emptyText"
+            @restore="props.historyPanel.onRestore"
+            @remove="props.historyPanel.onRemove"
+            @clear="props.historyPanel.onClear"
+          />
           <slot name="history" />
         </section>
       </template>

@@ -4,51 +4,23 @@ import ResultCard from '@/components/toolkit/ResultCard.vue'
 import ToolActionBar from '@/components/toolkit/ToolActionBar.vue'
 import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
-import { copyToClipboard } from '@/lib/clipboard'
 import { useMessage } from '@/shared/composables/useMessage'
-import { useToolDownload } from '@/tool-runtime/composables/useToolDownload'
-import { useToolDraft } from '@/tool-runtime/composables/useToolDraft'
+import { useToolCapabilityRuntime } from '@/tool-runtime/composables/useToolCapabilityRuntime'
 import { useToolExecution } from '@/tool-runtime/composables/useToolExecution'
-import { useToolHistory } from '@/tool-runtime/composables/useToolHistory'
-import { useToolSamples } from '@/tool-runtime/composables/useToolSamples'
-import { useToolShare } from '@/tool-runtime/composables/useToolShare'
 import { useToolState } from '@/tool-runtime/composables/useToolState'
-import ToolHistoryPanel from '@/tool-runtime/scaffolds/ToolHistoryPanel.vue'
-import ToolSamplePanel from '@/tool-runtime/scaffolds/ToolSamplePanel.vue'
-import type { ToolHistoryEntry } from '@/tool-runtime/services/tool-history-service'
 import ToolScaffold from '@/tool-runtime/scaffolds/ToolScaffold.vue'
 import { type TextCaseMode } from './logic'
-import {
-  buildTextToolkitDownloadPayload,
-  textToolkitRuntimeModule,
-  type TextToolkitInput,
-  type TextToolkitOutput,
-} from './module'
+import { textToolkitRuntimeModule, type TextToolkitInput, type TextToolkitOutput } from './module'
 
 const state = useToolState<TextToolkitInput, TextToolkitOutput>(textToolkitRuntimeModule)
-const draft = useToolDraft(textToolkitRuntimeModule, state, {
-  legacyKeys: ['magic-box:v1:tool-history:text-toolkit:state'],
-  parseLegacy: (raw) => {
-    try {
-      return JSON.parse(raw) as TextToolkitInput
-    } catch {
-      return undefined
-    }
+const execution = useToolExecution(textToolkitRuntimeModule, state, {
+  onSuccess: ({ input, output }) => {
+    runtime.handleExecutionSuccess(input, output)
   },
 })
-const history = useToolHistory(textToolkitRuntimeModule, state, {
-  buildEntryMeta: (input, output) => ({
-    label: output?.hasChanges ? '文本处理快照' : '文本未变化快照',
-    description: input.inputText.split('\n')[0] || '空内容',
-  }),
-})
-const { run, reset } = useToolExecution(textToolkitRuntimeModule, state)
-const download = useToolDownload(textToolkitRuntimeModule, state, {
-  buildPayload: (_, output) => buildTextToolkitDownloadPayload(output),
-})
-const samples = useToolSamples(textToolkitRuntimeModule, state)
-const share = useToolShare(textToolkitRuntimeModule, state)
-const { success: showSuccessMessage, error: showErrorMessage, info: showInfoMessage } = useMessage()
+const runtime = useToolCapabilityRuntime(textToolkitRuntimeModule, state, execution)
+const { run } = execution
+const { info: showInfoMessage } = useMessage()
 
 const outputText = computed(() => state.output.value?.outputText ?? '')
 const inputStats = computed(
@@ -71,7 +43,7 @@ const outputStats = computed(
 )
 const hasChanges = computed(() => state.output.value?.hasChanges ?? false)
 
-share.restoreSharedState()
+void runtime.restoreSharedState()
 
 watch(
   state.input,
@@ -81,25 +53,9 @@ watch(
   { deep: true }
 )
 
-async function copyValue(value: string, label: string) {
-  const copied = await copyToClipboard(value)
-
-  if (copied) {
-    showSuccessMessage(`${label}已复制`)
-    return
-  }
-
-  showErrorMessage('当前环境不支持复制')
-}
-
 function useOutputAsInput() {
   state.input.value.inputText = outputText.value
   showInfoMessage('已用处理结果覆盖输入')
-}
-
-function clearAll() {
-  draft.clearDraft()
-  reset()
 }
 
 function updateCaseMode(mode: TextCaseMode) {
@@ -112,15 +68,17 @@ function updateCaseMode(mode: TextCaseMode) {
 onMounted(() => {
   void run()
 })
-
-function saveSnapshot() {
-  history.recordHistory(state.input.value, state.output.value)
-  showSuccessMessage('已保存到历史记录')
-}
 </script>
 
 <template>
-  <ToolScaffold :meta="textToolkitRuntimeModule.meta" :loading="state.loading.value" :error="state.error.value" wide>
+  <ToolScaffold
+    :meta="textToolkitRuntimeModule.meta"
+    :loading="state.loading.value"
+    :error="state.error.value"
+    :sample-panel="runtime.samplePanel.value"
+    :history-panel="runtime.historyPanel.value"
+    wide
+  >
     <template #input>
       <ToolPaneShell title="输入区" subtitle="把常见文本整理动作收敛到一个面板里，适合快速处理碎片化文本。">
         <label class="field-row">
@@ -207,35 +165,13 @@ function saveSnapshot() {
             </label>
           </div>
         </ToolPanel>
-
-        <ToolSamplePanel
-          v-if="samples.sampleEnabled && samples.samples.value.length"
-          :samples="samples.samples.value"
-          @apply="(sampleId) => samples.applySample(samples.samples.value.find((sample) => sample.id === sampleId)!)"
-        />
       </ToolPaneShell>
     </template>
 
     <template #actions>
-      <ToolActionBar>
-        <button type="button" class="solid-button" @click="copyValue(outputText, '处理结果')">复制结果</button>
-        <button type="button" class="ghost-button" :disabled="!download.canDownload.value" @click="download.download">下载结果</button>
-        <button type="button" class="ghost-button" :disabled="!share.canShare.value" @click="share.copyShareUrl">复制分享链接</button>
-        <button v-if="history.historyEnabled" type="button" class="ghost-button" @click="saveSnapshot">保存快照</button>
+      <ToolActionBar :items="runtime.actionItems.value">
         <button type="button" class="ghost-button" :disabled="!hasChanges" @click="useOutputAsInput">用结果覆盖输入</button>
-        <button type="button" class="ghost-button" @click="clearAll">清空</button>
       </ToolActionBar>
-    </template>
-
-    <template #history>
-      <ToolHistoryPanel
-        v-if="history.historyEnabled"
-        :entries="history.entries.value"
-        empty-text="保存一次快照后，这里会记录最近的文本处理状态。"
-        @restore="(entry) => history.restoreEntry(entry as ToolHistoryEntry<TextToolkitInput, TextToolkitOutput>)"
-        @remove="history.removeEntry"
-        @clear="history.clearHistoryEntries"
-      />
     </template>
 
     <template #output>

@@ -104,4 +104,32 @@ export const textToolkitRuntimeModule: Omit<ToolModule<TextToolkitInput, TextToo
   createInitialInput: createTextToolkitInitialInput,
   execute: (input) => executeTextToolkit(input),
   samples: textToolkitSamples,
+  runtime: {
+    history: {
+      mode: 'manual',
+      emptyText: '保存一次快照后，这里会记录最近的文本处理状态。',
+      buildEntryMeta: (input, output) => ({
+        label: output?.hasChanges ? '文本处理快照' : '文本未变化快照',
+        description: input.inputText.split('\n')[0] || '空内容',
+      }),
+    },
+    draft: {
+      legacyKeys: ['magic-box:v1:tool-history:text-toolkit:state'],
+      parseLegacy: (raw) => {
+        try {
+          return JSON.parse(raw) as TextToolkitInput
+        } catch {
+          return undefined
+        }
+      },
+      resetLabel: '清空',
+    },
+    download: {
+      label: '下载结果',
+      buildPayload: (_, output) => buildTextToolkitDownloadPayload(output),
+    },
+    share: {
+      label: '复制分享链接',
+    },
+  },
 }

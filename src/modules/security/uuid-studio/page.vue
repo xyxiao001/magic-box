@@ -6,13 +6,10 @@ import ToolPanel from '@/components/toolkit/ToolPanel.vue'
 import ToolPaneShell from '@/components/toolkit/ToolPaneShell.vue'
 import { copyToClipboard } from '@/lib/clipboard'
 import { useMessage } from '@/shared/composables/useMessage'
-import { useToolDraft } from '@/tool-runtime/composables/useToolDraft'
+import { useToolCapabilityRuntime } from '@/tool-runtime/composables/useToolCapabilityRuntime'
 import { useToolExecution } from '@/tool-runtime/composables/useToolExecution'
-import { useToolHistory } from '@/tool-runtime/composables/useToolHistory'
 import { useToolState } from '@/tool-runtime/composables/useToolState'
-import ToolHistoryPanel from '@/tool-runtime/scaffolds/ToolHistoryPanel.vue'
 import ToolScaffold from '@/tool-runtime/scaffolds/ToolScaffold.vue'
-import type { ToolHistoryEntry } from '@/tool-runtime/services/tool-history-service'
 import { nanoAlphabetPresets, type NanoAlphabetPreset } from './logic'
 import {
   buildUuidValidationSummary,
@@ -22,30 +19,13 @@ import {
 } from './module'
 
 const state = useToolState<UuidStudioInput, UuidStudioOutput>(uuidStudioRuntimeModule)
-const draft = useToolDraft(uuidStudioRuntimeModule, state, {
-  legacyKeys: ['magic-box:v1:tool-history:uuid-studio:state'],
-  parseLegacy: (raw) => {
-    try {
-      return JSON.parse(raw) as UuidStudioInput
-    } catch {
-      return undefined
-    }
-  },
-})
-const history = useToolHistory(uuidStudioRuntimeModule, state, {
-  buildEntryMeta: (input, output) => ({
-    label: `${input.mode === 'uuid' ? 'UUID v4' : 'NanoID'} · ${output?.results.length ?? 0} 条`,
-    description:
-      output?.results[0] ??
-      (input.mode === 'uuid' ? '最近一次 UUID 生成结果' : '最近一次 NanoID 生成结果'),
-  }),
-})
-
-const { run, reset } = useToolExecution(uuidStudioRuntimeModule, state, {
+const execution = useToolExecution(uuidStudioRuntimeModule, state, {
   onSuccess: ({ input, output }) => {
-    history.recordHistory(input, output)
+    runtime.handleExecutionSuccess(input, output)
   },
 })
+const runtime = useToolCapabilityRuntime(uuidStudioRuntimeModule, state, execution)
+const { run } = execution
 const { success: showSuccessMessage, error: showErrorMessage } = useMessage()
 
 const results = computed(() => state.output.value?.results ?? [])
@@ -77,7 +57,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <ToolScaffold :meta="uuidStudioRuntimeModule.meta" :loading="state.loading.value" :error="state.error.value" wide>
+  <ToolScaffold
+    :meta="uuidStudioRuntimeModule.meta"
+    :loading="state.loading.value"
+    :error="state.error.value"
+    :history-panel="runtime.historyPanel.value"
+    wide
+  >
     <template #input>
       <ToolPaneShell title="生成配置" subtitle="支持 UUID v4 与 NanoID，适合批量生成测试数据、主键和临时标识。">
         <div class="tab-row">
@@ -135,37 +121,10 @@ onMounted(() => {
     </template>
 
     <template #actions>
-      <ToolActionBar>
+      <ToolActionBar :items="runtime.actionItems.value">
         <button type="button" class="solid-button" @click="run">生成</button>
-        <button type="button" class="ghost-button" :disabled="!results.length" @click="copyValue(results.join('\n'), '全部结果')">
-          复制全部
-        </button>
         <button type="button" class="ghost-button" @click="clearValidation">清空校验</button>
-        <button
-          v-if="draft.draftEnabled"
-          type="button"
-          class="ghost-button"
-          @click="
-            () => {
-              draft.clearDraft()
-              reset()
-            }
-          "
-        >
-          重置
-        </button>
       </ToolActionBar>
-    </template>
-
-    <template #history>
-      <ToolHistoryPanel
-        v-if="history.historyEnabled"
-        :entries="history.entries.value"
-        empty-text="生成一次结果后，这里会保存最近的 ID 快照。"
-        @restore="(entry) => history.restoreEntry(entry as ToolHistoryEntry<UuidStudioInput, UuidStudioOutput>)"
-        @remove="history.removeEntry"
-        @clear="history.clearHistoryEntries"
-      />
     </template>
 
     <template #output>

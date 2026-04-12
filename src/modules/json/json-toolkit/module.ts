@@ -219,4 +219,58 @@ export const jsonToolkitRuntimeModule: Omit<ToolModule<JsonToolkitInput, JsonToo
   meta: jsonToolkitMeta,
   createInitialInput: createJsonToolkitInitialInput,
   execute: (input) => executeJsonToolkit(input),
+  runtime: {
+    history: {
+      mode: 'on-success',
+      emptyText: '成功执行一次 JSON 处理后，这里会记录最近的结果。',
+      buildEntryMeta: (input, output) => ({
+        label:
+          input.action === 'format'
+            ? 'JSON 格式化'
+            : input.action === 'minify'
+              ? 'JSON 压缩'
+              : input.action === 'validate'
+                ? 'JSON 校验'
+                : '转 JS 对象',
+        description: output?.statusMessage ?? '最近一次 JSON 处理结果',
+      }),
+    },
+    draft: {
+      legacyKeys: ['magic-box:v1:tool-history:json-toolkit:state'],
+      parseLegacy: (raw) => {
+        try {
+          const parsed = JSON.parse(raw) as Partial<{
+            source: string
+          }>
+
+          if (!parsed.source) {
+            return undefined
+          }
+
+          return {
+            source: parsed.source,
+            action: 'format',
+          }
+        } catch {
+          return undefined
+        }
+      },
+    },
+    download: {
+      label: '下载输出',
+      buildPayload: (input, output) => buildJsonToolkitDownloadPayload(input, output),
+      buildSuccessMessage: (payload) => `已开始下载 ${payload.filename}`,
+    },
+    share: {
+      label: '复制分享链接',
+      autoRunOnRestore: true,
+      buildShareState: (input) => input,
+      applySharedState: (sharedState) => sharedState as JsonToolkitInput,
+    },
+    copyOutput: {
+      label: '复制输出',
+      buildText: (_, output) => output?.text || null,
+      buildSuccessMessage: () => '输出已复制',
+    },
+  },
 }

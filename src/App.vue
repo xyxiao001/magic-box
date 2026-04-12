@@ -16,6 +16,7 @@ interface BeforeInstallPromptEvent extends Event {
 const route = useRoute()
 const router = useRouter()
 const workbenchStore = useWorkbenchStore()
+const PWA_UPDATE_INTERVAL_MS = 30 * 60 * 1000
 
 const searchOpen = ref(false)
 const mobileMenuOpen = ref(false)
@@ -24,12 +25,29 @@ const searchInput = ref<HTMLInputElement | null>(null)
 const deferredInstallPrompt = ref<BeforeInstallPromptEvent | null>(null)
 const showInstallButton = ref(false)
 let compactLayoutMediaQuery: MediaQueryList | null = null
+let pwaUpdateTimer: number | null = null
 
 const {
   needRefresh: pwaNeedRefresh,
   offlineReady: pwaOfflineReady,
   updateServiceWorker,
-} = useRegisterSW()
+} = useRegisterSW({
+  onRegisteredSW(_swUrl, registration) {
+    if (!registration) {
+      return
+    }
+
+    const checkForUpdate = () => {
+      if (document.visibilityState !== 'visible' || !navigator.onLine) {
+        return
+      }
+
+      void registration.update()
+    }
+
+    pwaUpdateTimer = window.setInterval(checkForUpdate, PWA_UPDATE_INTERVAL_MS)
+  },
+})
 
 const currentModule = computed(() =>
   toolModules.find((module) => module.path === route.path)
@@ -249,6 +267,9 @@ onBeforeUnmount(() => {
   window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
   window.removeEventListener('appinstalled', handleAppInstalled)
   compactLayoutMediaQuery?.removeEventListener('change', handleCompactLayoutChange)
+  if (pwaUpdateTimer !== null) {
+    window.clearInterval(pwaUpdateTimer)
+  }
 })
 </script>
 

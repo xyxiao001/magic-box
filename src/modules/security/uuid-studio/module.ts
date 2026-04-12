@@ -84,4 +84,37 @@ export const uuidStudioRuntimeModule: Omit<ToolModule<UuidStudioInput, UuidStudi
   createInitialInput: createUuidStudioInitialInput,
   execute: (input) => executeUuidStudio(input),
   validate: (input) => validateUuidStudioInput(input),
+  runtime: {
+    history: {
+      mode: 'on-success',
+      emptyText: '生成一次结果后，这里会保存最近的 ID 快照。',
+      buildEntryMeta: (input, output) => ({
+        label: `${input.mode === 'uuid' ? 'UUID v4' : 'NanoID'} · ${output?.results.length ?? 0} 条`,
+        description:
+          output?.results[0] ??
+          (input.mode === 'uuid' ? '最近一次 UUID 生成结果' : '最近一次 NanoID 生成结果'),
+      }),
+    },
+    draft: {
+      legacyKeys: ['magic-box:v1:tool-history:uuid-studio:state'],
+      parseLegacy: (raw) => {
+        try {
+          return JSON.parse(raw) as UuidStudioInput
+        } catch {
+          return undefined
+        }
+      },
+    },
+    copyOutput: {
+      label: '复制全部',
+      buildText: (_, output) => {
+        if (!output?.results.length) {
+          return null
+        }
+
+        return output.results.join('\n')
+      },
+      buildSuccessMessage: () => '全部结果已复制',
+    },
+  },
 }
