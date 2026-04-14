@@ -190,6 +190,10 @@ onBeforeUnmount(() => {
         <button type="button" class="solid-button" @click="runAction('format')">格式化</button>
         <button type="button" class="ghost-button" @click="runAction('minify')">压缩</button>
         <button type="button" class="ghost-button" @click="runAction('validate')">校验</button>
+        <label class="action-option" title="递归解析子字段里形如 {..} 或 [..] 的 JSON 字符串">
+          <input v-model="state.input.value.deepConvert" type="checkbox" />
+          <span>深度转化</span>
+        </label>
         <button type="button" class="ghost-button" @click="runAction('convert-js-object')">转 JS 对象</button>
         <button type="button" class="ghost-button" :disabled="!canApplyOutput" @click="useOutputAsInput">应用到输入</button>
       </ToolActionBar>
@@ -277,6 +281,20 @@ onBeforeUnmount(() => {
 <style scoped>
 .json-output-area {
   min-height: 24rem;
+}
+
+.action-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0 0.5rem;
+  font-size: 0.875rem;
+  color: var(--text);
+  user-select: none;
+}
+
+.action-option input {
+  flex: none;
 }
 
 @media (min-width: 1200px) {

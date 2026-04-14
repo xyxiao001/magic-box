@@ -17,6 +17,8 @@ export type JsonToolkitOutputTab = 'text' | 'tree'
 export interface JsonToolkitInput {
   source: string
   action: JsonToolkitAction
+  /** When converting to JS object literal, recursively parse nested JSON strings (object/array only). */
+  deepConvert?: boolean
 }
 
 export interface JsonToolkitOutput {
@@ -101,10 +103,11 @@ export function createJsonToolkitInitialInput(): JsonToolkitInput {
   }
 }`,
     action: 'format',
+    deepConvert: false,
   }
 }
 
-function parseStructuredOutput(source: string) {
+function parseStructuredOutput(source: string): unknown | null {
   const parsed = parseJsonValue(source)
 
   if (!parsed.ok) {
@@ -114,8 +117,83 @@ function parseStructuredOutput(source: string) {
   return parsed.value ?? null
 }
 
+function looksLikeJsonContainer(raw: string) {
+  const trimmed = raw.trim()
+  if (!trimmed) {
+    return false
+  }
+  const first = trimmed[0]
+  const last = trimmed[trimmed.length - 1]
+  return (first === '{' && last === '}') || (first === '[' && last === ']')
+}
+
+function deepParseNestedJsonStrings(
+  value: unknown,
+  options: {
+    depth: number
+    maxDepth: number
+    maxStringLength: number
+  }
+): unknown {
+  if (options.depth >= options.maxDepth) {
+    return value
+  }
+
+  if (value === null) {
+    return value
+  }
+
+  if (Array.isArray(value)) {
+    return value.map((item) =>
+      deepParseNestedJsonStrings(item, {
+        ...options,
+        depth: options.depth + 1,
+      })
+    )
+  }
+
+  if (typeof value === 'object') {
+    const record = value as Record<string, unknown>
+    const next: Record<string, unknown> = {}
+    for (const [key, item] of Object.entries(record)) {
+      next[key] = deepParseNestedJsonStrings(item, {
+        ...options,
+        depth: options.depth + 1,
+      })
+    }
+    return next
+  }
+
+  if (typeof value !== 'string') {
+    return value
+  }
+
+  if (value.length > options.maxStringLength) {
+    return value
+  }
+
+  if (!looksLikeJsonContainer(value)) {
+    return value
+  }
+
+  const parsed = parseJsonValue(value)
+  if (!parsed.ok) {
+    return value
+  }
+
+  // Only upgrade strings to object/array; keep primitive parses as original string to avoid surprising changes.
+  if (parsed.value === null || typeof parsed.value !== 'object') {
+    return value
+  }
+
+  return deepParseNestedJsonStrings(parsed.value, {
+    ...options,
+    depth: options.depth + 1,
+  })
+}
+
 export function executeJsonToolkit(input: JsonToolkitInput): JsonToolkitOutput {
-  const structuredOutput = parseStructuredOutput(input.source)
+  let structuredOutput: unknown | null = parseStructuredOutput(input.source)
 
   if (input.action === 'format') {
     const result = formatJson(input.source)
@@ -168,7 +246,16 @@ export function executeJsonToolkit(input: JsonToolkitInput): JsonToolkitOutput {
     }
   }
 
-  const result = convertJsonToJsObject(input.source)
+  if (input.deepConvert) {
+    structuredOutput = deepParseNestedJsonStrings(structuredOutput, {
+      depth: 0,
+      maxDepth: 12,
+      maxStringLength: 100_000,
+    })
+  }
+
+  const rawForConversion = JSON.stringify(structuredOutput)
+  const result = convertJsonToJsObject(rawForConversion)
 
   if (!result.ok) {
     throw new Error(result.error ?? 'JSON 解析失败')
@@ -178,7 +265,7 @@ export function executeJsonToolkit(input: JsonToolkitInput): JsonToolkitOutput {
     text: result.value ?? '',
     outputType: 'js-object',
     structuredOutput,
-    statusMessage: '已转换为 JS 对象字面量',
+    statusMessage: input.deepConvert ? '已深度转换为 JS 对象字面量' : '已转换为 JS 对象字面量',
     statusTone: 'success',
     preferredTab: 'text',
   }
@@ -250,6 +337,7 @@ export const jsonToolkitRuntimeModule: Omit<ToolModule<JsonToolkitInput, JsonToo
           return {
             source: parsed.source,
             action: 'format',
+            deepConvert: false,
           }
         } catch {
           return undefined

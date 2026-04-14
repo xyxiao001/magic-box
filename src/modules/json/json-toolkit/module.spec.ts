@@ -34,4 +34,27 @@ describe('json toolkit module', () => {
 
     expect(buildJsonToolkitDownloadPayload(input, output)?.filename).toBe('json-toolkit-format.json')
   })
+
+  it('deep converts nested json strings when converting to js object', () => {
+    const input = createJsonToolkitInitialInput()
+    input.source = JSON.stringify({
+      request: '{"headers":{"x-foo":"bar"},"retry":[1,2]}',
+      list: ['{"enabled":true}', 'plain'],
+    })
+    input.action = 'convert-js-object'
+    input.deepConvert = true
+
+    const output = executeJsonToolkit(input)
+
+    expect(output.outputType).toBe('js-object')
+    expect(output.structuredOutput).toEqual({
+      request: {
+        headers: {
+          'x-foo': 'bar',
+        },
+        retry: [1, 2],
+      },
+      list: [{ enabled: true }, 'plain'],
+    })
+  })
 })
