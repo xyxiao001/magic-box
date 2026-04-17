@@ -17,6 +17,7 @@ const route = useRoute()
 const router = useRouter()
 const workbenchStore = useWorkbenchStore()
 const PWA_UPDATE_INTERVAL_MS = 30 * 60 * 1000
+const PWA_UPDATE_THROTTLE_MS = 60 * 1000
 
 const searchOpen = ref(false)
 const mobileMenuOpen = ref(false)
@@ -25,7 +26,10 @@ const searchInput = ref<HTMLInputElement | null>(null)
 const deferredInstallPrompt = ref<BeforeInstallPromptEvent | null>(null)
 const showInstallButton = ref(false)
 let compactLayoutMediaQuery: MediaQueryList | null = null
+let pwaRegistration: ServiceWorkerRegistration | null = null
 let pwaUpdateTimer: number | null = null
+let pwaUpdateCheckInFlight = false
+let lastPwaUpdateCheckAt = 0
 
 const {
   needRefresh: pwaNeedRefresh,
@@ -37,15 +41,12 @@ const {
       return
     }
 
-    const checkForUpdate = () => {
-      if (document.visibilityState !== 'visible' || !navigator.onLine) {
-        return
-      }
+    pwaRegistration = registration
+    void checkForPwaUpdate(true)
 
-      void registration.update()
-    }
-
-    pwaUpdateTimer = window.setInterval(checkForUpdate, PWA_UPDATE_INTERVAL_MS)
+    pwaUpdateTimer = window.setInterval(() => {
+      void checkForPwaUpdate()
+    }, PWA_UPDATE_INTERVAL_MS)
   },
 })
 
@@ -182,6 +183,30 @@ async function installPwa() {
   deferredInstallPrompt.value = null
 }
 
+async function checkForPwaUpdate(force = false) {
+  if (!pwaRegistration || document.visibilityState !== 'visible' || !navigator.onLine) {
+    return
+  }
+
+  const now = Date.now()
+
+  if (
+    !force &&
+    (pwaUpdateCheckInFlight || now - lastPwaUpdateCheckAt < PWA_UPDATE_THROTTLE_MS)
+  ) {
+    return
+  }
+
+  pwaUpdateCheckInFlight = true
+  lastPwaUpdateCheckAt = now
+
+  try {
+    await pwaRegistration.update()
+  } finally {
+    pwaUpdateCheckInFlight = false
+  }
+}
+
 function dismissPwaNotice(type: 'offline' | 'refresh') {
   if (type === 'offline') {
     pwaOfflineReady.value = false
@@ -200,6 +225,20 @@ function handleBeforeInstallPrompt(event: Event) {
 function handleAppInstalled() {
   deferredInstallPrompt.value = null
   showInstallButton.value = false
+}
+
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    void checkForPwaUpdate()
+  }
+}
+
+function handleWindowFocus() {
+  void checkForPwaUpdate()
+}
+
+function handleWindowOnline() {
+  void checkForPwaUpdate(true)
 }
 
 function handleGlobalKeydown(event: KeyboardEvent) {
@@ -256,6 +295,9 @@ onMounted(() => {
     workbenchStore.markToolUsed(currentModule.value.id)
   }
   window.addEventListener('keydown', handleGlobalKeydown)
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+  window.addEventListener('focus', handleWindowFocus)
+  window.addEventListener('online', handleWindowOnline)
   window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
   window.addEventListener('appinstalled', handleAppInstalled)
   compactLayoutMediaQuery.addEventListener('change', handleCompactLayoutChange)
@@ -264,6 +306,9 @@ onMounted(() => {
 onBeforeUnmount(() => {
   document.body.style.overflow = ''
   window.removeEventListener('keydown', handleGlobalKeydown)
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
+  window.removeEventListener('focus', handleWindowFocus)
+  window.removeEventListener('online', handleWindowOnline)
   window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
   window.removeEventListener('appinstalled', handleAppInstalled)
   compactLayoutMediaQuery?.removeEventListener('change', handleCompactLayoutChange)
