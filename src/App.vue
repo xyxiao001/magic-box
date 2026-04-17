@@ -207,6 +207,11 @@ async function checkForPwaUpdate(force = false) {
   }
 }
 
+async function applyPwaUpdate() {
+  pwaNeedRefresh.value = false
+  await updateServiceWorker(true)
+}
+
 function dismissPwaNotice(type: 'offline' | 'refresh') {
   if (type === 'offline') {
     pwaOfflineReady.value = false
@@ -538,7 +543,7 @@ onBeforeUnmount(() => {
             <p>刷新后即可使用最新内容和缓存。</p>
           </div>
           <div class="input-toolbar">
-            <button type="button" class="solid-button small-button" @click="updateServiceWorker(true)">
+            <button type="button" class="solid-button small-button" @click="applyPwaUpdate">
               立即更新
             </button>
             <button type="button" class="ghost-button small-button" @click="dismissPwaNotice('refresh')">
