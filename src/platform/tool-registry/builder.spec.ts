@@ -12,6 +12,7 @@ describe('tool registry builder', () => {
       'clipboard-history',
       'codec-lab',
       'markdown-studio',
+      'html-formatter',
       'http-lab',
       'json-toolkit',
       'json-diff-jsonpath',

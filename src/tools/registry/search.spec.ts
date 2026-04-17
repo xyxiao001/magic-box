@@ -33,6 +33,7 @@ describe('tool search ranking', () => {
     expect(searchToolDefinitions(toolDefinitions, 'jsonpath')[0]?.id).toBe('json-diff-jsonpath')
     expect(searchToolDefinitions(toolDefinitions, 'csv')[0]?.id).toBe('csv-toolkit')
     expect(searchToolDefinitions(toolDefinitions, 'sql')[0]?.id).toBe('sql-formatter')
+    expect(searchToolDefinitions(toolDefinitions, 'html')[0]?.id).toBe('html-formatter')
   })
 
   it('prefers favorites and recent usage in empty search ordering', () => {

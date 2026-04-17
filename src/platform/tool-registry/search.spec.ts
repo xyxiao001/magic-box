@@ -7,6 +7,7 @@ describe('platform tool registry search', () => {
     expect(searchToolDefinitions(toolDefinitions, 'query')[0]?.id).toBe('url-inspector')
     expect(searchToolDefinitions(toolDefinitions, 'csv')[0]?.id).toBe('csv-toolkit')
     expect(searchToolDefinitions(toolDefinitions, 'sql')[0]?.id).toBe('sql-formatter')
+    expect(searchToolDefinitions(toolDefinitions, 'html')[0]?.id).toBe('html-formatter')
   })
 
   it('boosts favorite and recent tools when query exists', () => {

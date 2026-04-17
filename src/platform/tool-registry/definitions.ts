@@ -1,4 +1,5 @@
 import { colorStudioModule } from '@/modules/design/color-studio'
+import { htmlFormatterModule } from '@/modules/document/html-formatter'
 import { markdownStudioModule } from '@/modules/document/markdown-studio'
 import { sqlFormatterModule } from '@/modules/database/sql-formatter'
 import { codecLabModule } from '@/modules/encoding/codec-lab'
@@ -52,6 +53,11 @@ export const platformToolModules: ToolRegistryModule[] = [
     meta: markdownStudioModule.meta,
     loader: markdownStudioModule.loader,
     page: markdownStudioModule.page,
+  },
+  {
+    meta: htmlFormatterModule.meta,
+    loader: htmlFormatterModule.loader,
+    page: htmlFormatterModule.page,
   },
   {
     meta: httpLabModule.meta,

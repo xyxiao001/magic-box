@@ -1,6 +1,6 @@
 # Magic Box
 
-Magic Box 是一个 local-first 的百宝箱网站，覆盖开发调试、内容编辑、接口联调、媒体处理和日常效率场景。当前仓库已经落地 31 个工具，带有 PWA、收藏与最近使用、历史记录、Spec Flow 文档约束，以及统一的桌面化界面体验。
+Magic Box 是一个 local-first 的百宝箱网站，覆盖开发调试、内容编辑、接口联调、媒体处理和日常效率场景。当前仓库已经落地 32 个工具，带有 PWA、收藏与最近使用、历史记录、Spec Flow 文档约束，以及统一的桌面化界面体验。
 
 ## 仓库当前包含什么
 
@@ -27,6 +27,7 @@ Magic Box 是一个 local-first 的百宝箱网站，覆盖开发调试、内容
   - Hash Studio
   - UUID / NanoID Studio
 - 文档与文本
+  - HTML Formatter
   - Markdown Studio
   - Text Toolkit
   - CSV Toolkit
@@ -49,7 +50,7 @@ Magic Box 是一个 local-first 的百宝箱网站，覆盖开发调试、内容
 - PWA：支持安装、自动更新提示、静态资源缓存和已访问页面离线访问
 - 工具工作台：支持搜索、收藏、最近使用以及部分工具的历史记录
 - 网络工具补充：`HTTP Lab`、`WebSocket Lab`、`Package Radar`、`Weather Desk` 依赖网络请求
-- 最新工具批次：已补齐 `JSON Diff / JSONPath`、`CSV Toolkit`、`SQL Formatter`
+- 最新工具批次：已补齐 `JSON Diff / JSONPath`、`CSV Toolkit`、`SQL Formatter`、`HTML Formatter`
 - Spec Flow：`/docs` 页面直接映射仓库里的规划文档，先写 spec 再实现
 - 统一体验：深浅主题、Liquid Glass 风格组件和统一工具布局
 

@@ -67,6 +67,7 @@
 - UUID / NanoID Studio
 - CSV Toolkit
 - SQL Formatter
+- HTML Formatter
 
 ## Phase 11: Planned
 
@@ -110,6 +111,7 @@
 - `HMAC Signer`
 - `CSV Toolkit`
 - `SQL Formatter`
+- `HTML Formatter`
 
 下一批建议：
 
